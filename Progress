@@ -1,0 +1,34 @@
+Progress on Disparity Program
+-----------------------------
+
+
+* Sat Nov 11 1995
+
+Got the net structure set up and the parameter file in place.  
+
+* Sun Nov 12 1995
+Initial weights created at random and can be written out
+see file dispwts.c
+
+* Input vectors kind of handled - see dispInputs.c
+function getInputVector() gets the nextInputVector.
+
+* Activation of cells calculated calcActivation() in dispnet.c
+works in a slowsum or fast method (use slow to check.)
+
+Things to do
+------------
+
+
+* Check number of weights being allocated ok.
+
+* ? How many input vectors per epoch?
+
+* Write the function to determine the value of the merit function V/U
+
+* Calculate errors for each cell.
+
+* Write the derivative function that creates the derivative at a point.
+
+
+* Diagnostics: ?use gplot to monitor the op values?
