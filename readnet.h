@@ -9,8 +9,8 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision$
-*** $Date$
+*** $Revision: 1.1 $
+*** $Date: 1995/11/09 20:48:50 $
 ****************************************************************************/
 
 
@@ -20,9 +20,9 @@
 /* Function definitions for readnet.c
  * This file can be included by all other source files. */
 
-typedef double Real;
 
 
+void freeActivationsArray();
 void readNet(char *fname);
 int cellArea(int tlx, int tly, int brx, int bry);
 void createWeights(int len);
@@ -31,42 +31,13 @@ Real *nextFreeWeight();
 
 
 
-/* Do we need bias for a layer? */
-typedef  enum  { nobias, bias} BiasType;
-
-/* Possible types of activation function */
-typedef  enum {linearfn, tanhfn} ActFn;
-
-typedef struct {
-  int  numInputs;
-  Real *inputs;
-  Real *wtsStart;
-} CellInfo;
-
-
-typedef struct {
-  int      ncells;
-  int      nrows;
-  int      ncols;
-  CellInfo *cellInfo;
-  ActFn    actfn;
-  BiasType bias;
-} LayerInfo;
-
-
-typedef struct {
-  Real	*data;
-  int	nextfreeweight;
-  int	maxindex;
-} WeightInfo;
-
-#define AND &&
-#define OR ||
-
 #endif
 
 
 /*************************** Version Log ****************************/
-/* $Log$
+/* $Log: readnet.h,v $
+ * Revision 1.1  1995/11/09  20:48:50  stephene
+ * Initial revision
+ *
  *
  */

@@ -1,6 +1,6 @@
 /****************************************************************************
 ***
-*** Time-stamp: <09 Nov 95 20:48:32 stephene>
+*** Time-stamp: <10 Nov 95 21:20:33 stephene>
 ***
 *** readnet.c
 *** 
@@ -9,13 +9,13 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.1 $
-*** $Date: 1995/11/09 20:48:36 $
+*** $Revision: 1.2 $
+*** $Date: 1995/11/10 15:28:36 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/readnet.c,v 1.1 1995/11/09 20:48:36 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/readnet.c,v 1.2 1995/11/10 15:28:36 stephene Exp stephene $";
 #endif
 
 
@@ -31,6 +31,7 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/readnet.c,v 1.1 1
 #include <stdio.h>
 #include "dispnet.h"
 #include "readnet.h"
+
 /* - Defines - */
 #define MAX_NUM_WEIGHTS 2000
 #define TWODTOONED(x,y,wid) ( (wid)*(y) + (x))
@@ -66,25 +67,20 @@ void readNet(char *fname)
 
   /*** Local Variables ***/
 
-  int destLayer;
-  int layer,cell;
-  CellInfo  *cellInfo;
-
-
-
-
-  int       unitnum;
-  int       numunits;
-  int       tlx, tly, brx, bry;
-  Rect	    rect;
-  int       readingConnections;
-  int       nextLayer;
-  char      afn[30], anybias[30];
-
-  int       i, returnval;
-  int       nLayers;
-  int       layernum, wid, ht;
-  int       ncols, nrows;
+  int      destLayer;
+  int      layer,cell;
+  CellInfo *cellInfo;
+  int      unitnum;
+  int      numunits;
+  int      tlx, tly, brx, bry;
+  Rect     rect;
+  int      readingConnections;
+  int      nextLayer;
+  char     afn[30], anybias[30];
+  int      i, returnval;
+  int      nLayers;
+  int      layernum, wid, ht;
+  int      ncols, nrows;
 
 
 
@@ -213,6 +209,23 @@ void readNet(char *fname)
 	exit(-1);
       }
 
+      /*** Create the space for the cellInfo structures ***/
+
+      numunits = layerInfo[nextLayer].ncells;
+      
+      /* Create space for the cellInfo structure */
+      
+      
+      cellInfo = (CellInfo*)calloc(numunits, sizeof(CellInfo));
+      if (! cellInfo) { 
+	printf("%s: could not allocate space for cellInfo\n",
+	       __FUNCTION__);
+	exit(-1);
+      }
+      layerInfo[nextLayer].cellInfo = cellInfo;
+
+
+
 /*       fgets(line, linelen, structFP); linenum++; */
       readNextLine();
       if (!strncmp(line, "full",4) ) {
@@ -229,7 +242,7 @@ void readNet(char *fname)
 	rect.tly = 0;
 	rect.brx = ncols-1;
 	rect.bry = nrows-1;
-
+	numunits = layerInfo[nextLayer].ncells;
 	for (unitnum=0; unitnum < numunits; unitnum++) {
 	  /* xxxx */
 	  connectCells( nextLayer-1,  unitnum,  nextLayer, rect);
@@ -248,20 +261,6 @@ void readNet(char *fname)
 	nrows = layerInfo[nextLayer-1].nrows;
 	/* we will need to read in a set of conections for 
 	   every weight in this layer */
-
-	numunits = layerInfo[nextLayer].ncells;
-
-	/* Create space for the cellInfo structure */
-	
-
-	cellInfo = (CellInfo*)calloc(numunits, sizeof(CellInfo));
-	if (! cellInfo) { 
-	  printf("%s: could not allocate space for cellInfo\n",
-		 __FUNCTION__);
-	  exit(-1);
-	}
-	layerInfo[nextLayer].cellInfo = cellInfo;
-
 	
 	/* The first line of unit connections has already been read
            into line, and so we dont need to do a fgets until we want
@@ -658,13 +657,13 @@ void printNet()
 
   activationcell = 0;
   for(layer=0; layer < netInfo.nLayers; layer++) {
-    printf("\n\nLayer %d\n",layer);
     ncols = layerInfo[layer].ncols;
     nrows = layerInfo[layer].nrows;
+    printf("\n\nLayer %d [0 0 %d %d]\n\n",layer, ncols-1, nrows-1);
     cellnum =0;
     for(y=0; y< nrows; y++) {
       for(x=0; x<ncols; x++) {
-	printf("%d ", cellnum++);
+	printf("%2d ", cellnum++);
       }
       printf("\n");
     }
@@ -680,7 +679,7 @@ void printNet()
     nrows = layerInfo[layer].nrows;
     for(y=0; y< nrows; y++) {
       for(x=0; x<ncols; x++) {
-	printf("%d ", activationcell++);
+	printf("%2d ", activationcell++);
       }
       printf("\n");
     }
@@ -697,6 +696,12 @@ void printNet()
 /*************************** Version Log ****************************/
 /*
  * $Log: readnet.c,v $
+ * Revision 1.2  1995/11/10  15:28:36  stephene
+ * Daily update - next major step is to present net with input and
+ * calculate activations.
+ *
+ * Will also need to initialise weights.
+ *
  * Revision 1.1  1995/11/09  20:48:36  stephene
  * Initial revision
  *
