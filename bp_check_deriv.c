@@ -61,6 +61,9 @@ int				CG_TRY_NUM;
 REAL			BP_CHECK_STEP_FACTOR = 1e-6;
 char			STEPPED_TO_MIN;
 
+/* FIXED_STEP_FACTOR is normally TRUE to do a fixed small step. */
+/* If set to false, it seems to take the ratio away from 1.0 */
+
 char				FIXED_STEP_FACTOR = TRUE;
 int					*TRAINING_ITERATION;
 
@@ -363,13 +366,13 @@ check_length(int imin, int imax)
 ***
 *** Created 23 Nov 95
 ***
-*** $Revision$
-*** $Date$
+*** $Revision: 1.1 $
+*** $Date: 1995/11/23 16:30:22 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header$";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/bp_check_deriv.c,v 1.1 1995/11/23 16:30:22 stephene Exp stephene $";
 #endif
 
 
@@ -390,6 +393,9 @@ static char *rcsid = "$Header$";
 
 /*************************** Version Log ****************************/
 /*
- * $Log$
+ * $Log: bp_check_deriv.c,v $
+ * Revision 1.1  1995/11/23  16:30:22  stephene
+ * Initial revision
+ *
  */
 
