@@ -7,8 +7,8 @@
 ###
 ### Created 09 Nov 95
 ###
-### $Revision: 1.6 $
-### $Date: 1995/12/07 15:43:05 $
+### $Revision: 1.7 $
+### $Date: 1995/12/11 06:27:10 $
 #############################################################################
 CC = gcc
 
@@ -77,7 +77,8 @@ clean:
 
 
 # Use my version of tags.
-SRCTAGS = readnet.c readnet.h testnet.c dispnet.h dispnet.c dispwts.c \
+SRCTAGS = readnet.c readnet.h testnet.c dispnet.h dispnet.c \
+dispvars.h dispglobals.h dispwts.c rnd.h cg_williams_module.h \
 dispinputs.c dispinputs.h dispmasks.c dispglobals.h convolve.c \
 disperrors.c cg_williams_module.c bp_check_deriv.c
 
@@ -90,6 +91,10 @@ tags.testconvolve: testconvolve.c convolve.c
 ############################ Version Log #############################
 #
 # $Log: makefile,v $
+# Revision 1.7  1995/12/11  06:27:10  stephene
+# testnet2 put in for checks.
+# Removed -lmygen and CLIBDIRS, CHEADERDIRS for portability
+#
 # Revision 1.6  1995/12/07  15:43:05  stephene
 # post nips sort out
 #
