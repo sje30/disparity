@@ -9,19 +9,20 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.8 $
-*** $Date: 1995/12/13 04:03:35 $
+*** $Revision: 1.9 $
+*** $Date: 1996/01/16 01:27:39 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispnet.c,v 1.8 1995/12/13 04:03:35 stephene Exp stephene $";
+static char *rcsid = "$Header: /home/stephen/disparity/dispnet.c,v 1.9 1996/01/16 01:27:39 stephene Exp stephen $";
 #endif
 
 /* Main code file for the Disparity net. */
 
 /* -  Include Files - */
 #include <stdio.h>
+#include <string.h>
 #include <math.h>
 #include "dispinputs.h"
 #include "dispvars.h"
@@ -1035,34 +1036,4 @@ Rvec_correlate(Real *x, Real *y, int imin, int imax)
   
   return((Real)r);
 }
-
-
-/*************************** Version Log ****************************/
-/*
- * $Log: dispnet.c,v $
- * Revision 1.8  1995/12/13  04:03:35  stephene
- * simple comment added
- *
- * Revision 1.7  1995/12/08  00:17:32  stephene
- * Including the correlation code from Jim (slightly amended)
- *
- * Revision 1.6  1995/11/23  16:19:42  stephene
- * CG now installed
- *
- * Revision 1.5  1995/11/21  23:32:38  stephene
- * About to include CG Code
- *
- * Revision 1.4  1995/11/21  02:32:37  stephene
- * Update - moving towards a merit function
- *
- * Revision 1.3  1995/11/17  00:04:58  stephene
- * Daily update
- *
- * Revision 1.2  1995/11/13  22:14:48  stephene
- * Daily Change
- *
- * Revision 1.1  1995/11/12  23:37:48  stephene
- * Initial revision
- *
- */
 

@@ -9,19 +9,20 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.9 $
-*** $Date: 1997/06/17 23:00:07 $
+*** $Revision: 1.10 $
+*** $Date: 1998/03/19 13:04:46 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsunx/home/stephene/disparity/dispinputs.c,v 1.9 1997/06/17 23:00:07 stephene Exp stephene $";
+static char *rcsid = "$Header: /home/stephen/disparity/dispinputs.c,v 1.10 1998/03/19 13:04:46 stephen Exp stephen $";
 #endif
 
 /* Functions to provide the input to the disparity network */
 
 /* -  Include Files - */
 #include <stdio.h>
+#include <string.h>
 #include <math.h>
 #include "dispnet.h"
 #include "dispglobals.h"
@@ -727,40 +728,3 @@ Real sqr(Real x)
 {
   return (x*x);
 }
-
-/*************************** Version Log ****************************/
-/*
- * $Log: dispinputs.c,v $
- * Revision 1.9  1997/06/17  23:00:07  stephene
- * added normInput variable for choice of normalising input
- * and then introduced code to do the normalisation
- *
- * Revision 1.8  1997/06/13  19:33:33  stephene
- * added code for computing orientation of each input vector
- *
- * Revision 1.7  1996/01/16  01:27:37  stephene
- * now have the code in place so that weight sharing can be done or left
- * out.
- *
- * Revision 1.6  1996/01/15  12:50:58  stephene
- * just before snapshot for ali's extensions
- *
- * Revision 1.5  1995/12/15  17:15:03  stephene
- * changed setBiases() so that the activation function is checked when
- * calculating the cell output. Also put in check for
- * getNextInputVector() to make sure input cells are identity cells
- *
- * Revision 1.4  1995/12/10  17:54:40  stephene
- * Changed the method in which inputs are read in to the network, so that
- * more than one row can be read from an input image.
- *
- * Revision 1.3  1995/11/21  23:31:48  stephene
- * About to include CG Code
- *
- * Revision 1.2  1995/11/17  00:04:26  stephene
- * *** empty log message ***
- *
- * Revision 1.1  1995/11/12  23:06:05  stephene
- * Initial revision
- *
- */
