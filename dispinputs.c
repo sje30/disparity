@@ -9,13 +9,13 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision$
-*** $Date$
+*** $Revision: 1.1 $
+*** $Date: 1995/11/12 23:06:05 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header$";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispinputs.c,v 1.1 1995/11/12 23:06:05 stephene Exp stephene $";
 #endif
 
 /* Functions to provide the input to the disparity network */
@@ -47,15 +47,18 @@ void getInputVector()
   /* For the moment, we can just create random numbers. */
   /*** Local Variables ***/
   int i;
-  Real *actn;
+  Real *actn, *op;
   int offset;
   i = layerInfo[ INPUTLAYER ].ncells;
-  
-  offset = actInfo.startLayer[INPUTLAYER]; /* Should be zero. */
+
+  offset = actInfo.startLayer[INPUTLAYER]; /* Should be zero. */ 
   actn = &(actInfo.actn[offset]);
+  op = &(actInfo.op[offset]);
   for(; i-->0; ) {
     *actn = rnd();
+    *op = *actn;
     actn++;
+    op++;
   }
 }
 
@@ -64,8 +67,8 @@ void getInputVector()
 void setBiases()
 {
   /* If bias is required for a layer, this function will set the
-   * appropriate bias elements in the activation array to 1.0 .
-   */				
+   * appropriate bias elements in the activation array and the output
+   * array to 1.0 .  */
   int layer;
   int lastInputLayer;
   
@@ -76,6 +79,7 @@ void setBiases()
 
       /* This will need checking  */
       actInfo.actn[actInfo.biasIndex[layer] ] = 1.0;
+      actInfo.op[actInfo.biasIndex[layer] ] = 1.0;
     }
   }
 }
@@ -96,8 +100,17 @@ void clearActivationArray()
   }
 }
 
+void readInData()
+{
+  /* Read in the data from the files, along with the shift values. */
+  ;
+}
+  
 /*************************** Version Log ****************************/
 /*
- * $Log$
+ * $Log: dispinputs.c,v $
+ * Revision 1.1  1995/11/12  23:06:05  stephene
+ * Initial revision
+ *
  */
 
