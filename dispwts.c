@@ -9,13 +9,13 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.1 $
-*** $Date: 1995/11/12 23:06:13 $
+*** $Revision: 1.2 $
+*** $Date: 1995/11/17 00:06:02 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispwts.c,v 1.1 1995/11/12 23:06:13 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispwts.c,v 1.2 1995/11/17 00:06:02 stephene Exp stephene $";
 #endif
 
 /* Functions to create and manipulate weights for disparity program */
@@ -51,34 +51,78 @@ void createWeights(int len)
    * structures */
 
   Real	*data;
-
+  int	*preCells, *postCells;
+  
   data = (Real*)calloc(len, sizeof(Real));
   if (! data) { 
     printf("%s: could not allocate space for data\n", __FUNCTION__);
     exit(-1);
   }
 
+  preCells = (int*)calloc(len, sizeof(int));
+  if (! preCells) { 
+    printf("%s: could not allocate space for preCells\n", __FUNCTION__);
+    exit(-1);
+  }
+
+  postCells = (int*)calloc(len, sizeof(int));
+  if (! postCells) { 
+    printf("%s: could not allocate space for PostCells\n", __FUNCTION__);
+    exit(-1);
+  }
+
+  
   weightInfo.data = data;
   weightInfo.nextFreeWeight = 0;
   weightInfo.maxIndex = len-1;
+  weightInfo.preCell = preCells;
+  weightInfo.postCell = postCells;
 }
 
+void showWeights()
+{
+  /* Print out the weights Info */
+  int i;
+  int numWeights;
+
+  numWeights = weightInfo.numWts;
+
+  printf("There are %d weights : \n");
+  for(i=0; i<numWeights; i++) {
+    printf("Weight %d (%lf) connects cell %d to cell %d\n",
+	   i, weightInfo.data[i],
+	   weightInfo.preCell[i], weightInfo.postCell[i]);
+  }
+}
+
+  
+  
 
 void freeWeights()
 {
   /* Clear up the weights structure */
   cfree(weightInfo.data);
+  cfree(weightInfo.preCell);
+  cfree(weightInfo.postCell);  
   weightInfo.nextFreeWeight = -999;
   weightInfo.maxIndex = -999;
 }
   
 
-Real *nextFreeWeight()
+Real *nextFreeWeight(int preCellNum, int postCellNum)
 {
-  /* Allocate the next free weight */
+  /* Allocate the next free weight. This weight is to be used to
+     connect cell number preCellNum to cell number postCellNum. */
+  
   Real *nextwt;
+  int nextfree = weightInfo.nextFreeWeight;
+
+  weightInfo.preCell[nextfree] = preCellNum;
+  weightInfo.postCell[nextfree] = postCellNum;
   nextwt = &(weightInfo.data[weightInfo.nextFreeWeight]);
   weightInfo.nextFreeWeight++;
+
+
   return nextwt;
 }
 
@@ -168,6 +212,9 @@ void writeWts(char *fname)
 /*************************** Version Log ****************************/
 /*
  * $Log: dispwts.c,v $
+ * Revision 1.2  1995/11/17  00:06:02  stephene
+ * New randomise procedure for the weights provided by Jim.
+ *
  * Revision 1.1  1995/11/12  23:06:13  stephene
  * Initial revision
  *

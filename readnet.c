@@ -7,13 +7,13 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.5 $
-*** $Date: 1995/11/13 22:09:57 $
+*** $Revision: 1.6 $
+*** $Date: 1995/11/17 00:07:09 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/readnet.c,v 1.5 1995/11/13 22:09:57 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/readnet.c,v 1.6 1995/11/17 00:07:09 stephene Exp stephene $";
 #endif
 
 
@@ -117,7 +117,7 @@ void readNet(char *fname)
     /*   fgets(line, linelen, structFP); linenum++; */
     readNextLine();
     returnval = sscanf(line, "layer %d %d %d\n", &layernum,  &wid, &ht);
-    printf("return value = %d\n", returnval);
+
     if ( returnval != 3 ) {
       printf("%s: Error  reading layer %d data from %s (line %d): only found %d elements\n", 
 	     __FUNCTION__, layernum, fname, linenum,  returnval);
@@ -181,6 +181,10 @@ void readNet(char *fname)
 
 
   createActivationArray();
+  createAllActns();		/* Must be called after creating
+				 * createActivationArray, since it
+				 * relies on the Activation array.
+				 */
   showActivationsArray();
 
   /***************************************************/
@@ -562,8 +566,8 @@ void connectCells(int sourceLayer, int unitnum, int destLayer, Rect rect)
    * into the destLayer. */
 
   /*** Local Variables ***/
-      int nextElement;
-      preCellInfo_t *preCellInfo;
+  int nextElement;
+  preCellInfo_t *preCellInfo;
   int nOutputs;
   Real **ptrInputs;
   int  inputcell;
@@ -577,6 +581,12 @@ void connectCells(int sourceLayer, int unitnum, int destLayer, Rect rect)
   int	inputOffset;
   cellInfo_t	*cellInfo;
   Real	*nextwt;
+  int		index;
+  int srcoffset, destoffset;
+
+
+  srcoffset = actInfo.startLayer[sourceLayer];
+  destoffset = actInfo.startLayer[sourceLayer+1];
 
   ncols = layerInfo[sourceLayer].ncols;
   cellInfo = layerInfo[destLayer].cellInfo;
@@ -625,9 +635,10 @@ void connectCells(int sourceLayer, int unitnum, int destLayer, Rect rect)
   firstInput =1;
   for(y=tly; y<=bry; y++) {
     for(x=tlx; x<=brx; x++) {
-      
       inputcell = TWODTOONED(x,y,ncols);
-      nextwt = nextFreeWeight();
+      index = weightInfo.nextFreeWeight;
+
+      nextwt = nextFreeWeight(srcoffset + inputcell, destoffset + unitnum);
       /* Connect INPUTCELL in source layer to cell UNITNUM in the dest
 	 layer via the weight NEXTWT. */
 	 
@@ -647,6 +658,7 @@ void connectCells(int sourceLayer, int unitnum, int destLayer, Rect rect)
       nextElement = preCellInfo[inputcell].nOutputs;
 
       preCellInfo[inputcell].wts[nextElement] = nextwt;
+      preCellInfo[inputcell].wtsIndex[nextElement] = index;
       preCellInfo[inputcell].outputs[nextElement] = unitnum;
       preCellInfo[inputcell].nOutputs++;
       
@@ -657,20 +669,27 @@ void connectCells(int sourceLayer, int unitnum, int destLayer, Rect rect)
     /* Add the input from the bias cell */
     cellinputs[inputnum] = actInfo.biasIndex[sourceLayer];
     ptrInputs[inputnum] = &(actInfo.op[actInfo.biasIndex[sourceLayer]]);
-    nextwt = nextFreeWeight();
 
-    /* Fill in pre synaptic cell info */
+
+
+
 
     /* work out the cell number of the bias cell in the
      * presynaptic layer. */
     inputcell = actInfo.biasIndex[sourceLayer] -
       actInfo.startLayer[sourceLayer];
-    
+
+    index = weightInfo.nextFreeWeight;
+    nextwt = nextFreeWeight(srcoffset + inputcell, destoffset + unitnum);
+
+    /* Fill in pre synaptic cell info */
     preCellInfo = layerInfo[sourceLayer].preCellInfo;
     nextElement = preCellInfo[inputcell].nOutputs;
     
     preCellInfo[inputcell].wts[nextElement] = nextwt;
+    preCellInfo[inputcell].wtsIndex[nextElement] = index;
     preCellInfo[inputcell].outputs[nextElement] = unitnum;
+    
     preCellInfo[inputcell].nOutputs++;
     
   }
@@ -683,11 +702,13 @@ void printPreCellInfo()
 {
   /* Print out the presynaptic cell info */
   /*** Local Variables ***/
-  int         layer,i, numunits, unit;
-  int         lastInputLayer;
-  Real        **wts;
+
+  int		layer,i, numunits, unit;
+  int		lastInputLayer;
+  Real		**wts;
   preCellInfo_t *preCellInfo;
-  int         *outputs;
+  int         	*outputs;
+  int		*wtsIndex;
   
   /* There is no preCellInfo for the last layer - the op layer. */
   lastInputLayer = netInfo.nLayers - 1;
@@ -702,10 +723,11 @@ void printPreCellInfo()
 
       i = preCellInfo[unit].nOutputs;
       wts = preCellInfo[unit].wts;
+      wtsIndex = preCellInfo[unit].wtsIndex;
       outputs = preCellInfo[unit].outputs;
       for(; i-->0; ) {
-	printf("Wt %d to cell %d\n", (int)*wts, *outputs);
-	outputs++; wts++;
+	printf("Wt %d (index %d) to cell %d\n", (int)*wts, *wtsIndex, *outputs);
+	outputs++; wts++; wtsIndex++;
       }
     }
   }
@@ -716,15 +738,17 @@ void createPreCellInfo()
   /* Create the preCellInfo structures for the input cells */
 
   /*** Local Variables ***/  
-  int cell;
-  int nOutputCells;
-  int	*outputs;
-  Real **wts;
-  int nOutpuCells, destLayer;
+  int		 cell;
+  int		 nOutputCells;
+  int		*outputs;
+  Real		 **wts;
+  int		*wtsIndex;
+  int		nOutpuCells, destLayer;
   preCellInfo_t	*preCellInfo;
-  int layer, numInputCells;
+  int		layer, numInputCells;
+  
     
-  int lastInputLayer = netInfo.nLayers-1;
+  int		lastInputLayer = netInfo.nLayers-1;
 
   for(layer=0; layer < lastInputLayer; layer++) {
     printf("Creating preCellInfo for layer %d\n", layer);
@@ -768,12 +792,21 @@ void createPreCellInfo()
 	exit(-1);
       }
 
+
+      wtsIndex = (int*)calloc(nOutputCells, sizeof(int));
+      if (! wtsIndex) { 
+	printf("%s: could not allocate space for wtsIndex\n", __FUNCTION__);
+	exit(-1);
+      }
+
+      
       outputs = (int *)calloc(nOutputCells, sizeof(int));
       if (! outputs) { 
 	printf("%s: could not allocate space for outputs\n", __FUNCTION__);
 	exit(-1);
       }
       preCellInfo[cell].wts = wts;
+      preCellInfo[cell].wtsIndex = wtsIndex;
       preCellInfo[cell].outputs = outputs;
     }
   }
@@ -797,6 +830,7 @@ void freePreCellInfo()
     preCellInfo = layerInfo[layer].preCellInfo;
     for(cell=0; cell<numInputCells; cell++) {
       cfree(preCellInfo[cell].wts);
+      cfree(preCellInfo[cell].wtsIndex);
       cfree(preCellInfo[cell].outputs);
     }
     cfree (layerInfo[layer].preCellInfo);
@@ -875,6 +909,10 @@ void printNet()
 /*************************** Version Log ****************************/
 /*
  * $Log: readnet.c,v $
+ * Revision 1.6  1995/11/17  00:07:09  stephene
+ * calcActivation: changed so that it looks in the .op array rather than
+ * the actn array.
+ *
  * Revision 1.5  1995/11/13  22:09:57  stephene
  * connectCells() updated so that it can work out which output cells
  * connect to an input cell.

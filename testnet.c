@@ -9,13 +9,13 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.3 $
-*** $Date: 1995/11/17 00:07:35 $
+*** $Revision: 1.4 $
+*** $Date: 1995/11/21 02:32:27 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.3 1995/11/17 00:07:35 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.4 1995/11/21 02:32:27 stephene Exp stephene $";
 #endif
 
 
@@ -27,6 +27,7 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.3 1
 #include "readnet.h"
 #include "dispwts.h"
 #include "dispglobals.h"
+#include "disperrors.h"
 #include <stdio.h>
 
 /* - Defines - */
@@ -61,7 +62,7 @@ normalmain(int argc, char *argv[])
   int vecnum;
   extern int	yylex();
   double u,v;
-
+  double u1, v1;	/* u1 = 1.0/U and v1 = 1.0/V */
 
 /*  testArrayDist();   exit(-1); */
   
@@ -98,6 +99,11 @@ the dimensionality of the input vectors (%d)\n",
   setUpGnuplot();
   createZs();
 
+
+  /* Weights must have been allocated before this routine is called,
+   * as it must know the number of weights that were allocated. */
+  createdw();
+  
   createMasks();
   writeMask(uMask, "umask");
   writeMask(vMask, "vmask");
@@ -135,8 +141,51 @@ the dimensionality of the input vectors (%d)\n",
   v = arrayDist(z, zbar);
 
   printf("U %lf\t V %lf\n", u, v);
+
+  /* zbar min z is simpley zbar - z */
+  /* ztilde min z is ztilde - z */
   
+  subArray(zbar, z, zbarminz);
+  subArray(ztilde, z, ztildeminz);
+
+  writeArray(zbarminz, "zbarminz");
+  writeArray(ztildeminz, "ztildeminz");
+
+  /* now create dU/dX and dV/dX by convolution. */
+  double_convolve_wrap(ztildeminz,
+		       uMaskD,
+		       dudx);
+
+
+  double_convolve_wrap(zbarminz,
+		       vMaskD,
+		       dvdx);
+
+  writeArray(dudx, "dudx");
+  writeArray(dvdx, "dvdx");	
+
+  v1 = 1.0 / v;
+  u1 = 1.0 / u;
+
+  printf("1/u %lf 1/v %lf \n", u1, v1);
+
+  multArrayInPlace( dudx, u1);
+  multArrayInPlace( dvdx, v1);
+
+  subArray(dvdx, dudx, da);
+
+  writeArray(da, "da");
   
+  /* da = dF/dx_a  = 1/v dV/Dx_a - 1/u dU/dx_a */
+
+
+  printAllActns("allacts");
+  storeTopLayerErrors(da);
+
+  propagateErrors();
+
+  printAllActns("allacts2");
+  createPartials();
   clearUpMemory();
 
   /*     iteration(); */
@@ -213,6 +262,9 @@ void printParams()
 /*************************** Version Log ****************************/
 /*
  * $Log: testnet.c,v $
+ * Revision 1.4  1995/11/21  02:32:27  stephene
+ * Update - moving towards a merit function
+ *
  * Revision 1.3  1995/11/17  00:07:35  stephene
  * # daily update
  *

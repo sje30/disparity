@@ -9,13 +9,13 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.3 $
-*** $Date: 1995/11/17 00:04:58 $
+*** $Revision: 1.4 $
+*** $Date: 1995/11/21 02:32:37 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispnet.c,v 1.3 1995/11/17 00:04:58 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispnet.c,v 1.4 1995/11/21 02:32:37 stephene Exp stephene $";
 #endif
 
 /* Main code file for the Disparity net. */
@@ -88,7 +88,8 @@ void calcActivation(int layer)
   					 activation units for this
   					 layer */
 
-#define slowsum
+
+#undef slowsum
 
 #ifdef slowsum
   printf("Calculating activation of cells in layer %d\n", layer);
@@ -286,6 +287,7 @@ void clearUpMemory()
   freeActivationsArray();
   freeAllActns();
   freePreCellInfo();
+  freedw();
   freeZs();
   freeCellInfo();		/* Free up cellInfo before layerInfo */
   cfree(layerInfo);
@@ -426,8 +428,10 @@ void createAllActns ()
   /*** Local Variables ***/
   Real	*actdata;
   Real	*opdata;
+  Real	*errordata;
   Real	**allOps;
   Real	**allActs;
+  Real	**errors;  
   int	numUnits, num, i;
 
   
@@ -450,6 +454,13 @@ void createAllActns ()
   }
 
 
+  errors = (Real **)calloc(num, sizeof(Real *));
+  if (! errors) { 
+    printf("%s: could not allocate space for errors\n", __FUNCTION__);
+    exit(-1);
+  }
+
+
 
   for(i=0; i< numInputVectors; i++) {
     actdata = (Real*)calloc(numUnits, sizeof(Real));
@@ -463,16 +474,94 @@ void createAllActns ()
       printf("%s: could not allocate space for opdata\n", __FUNCTION__);
       exit(-1);
     }
+
+    errordata = (Real*)calloc(numUnits, sizeof(Real));
+    if (! errordata) { 
+      printf("%s: could not allocate space for errordata\n", __FUNCTION__);
+      exit(-1);
+    }
+
     allActs[i] = actdata;
     allOps[i] = opdata;
+    errors[i] = errordata;
   }
   allActns.allActs = allActs;
   allActns.allOps= allOps;
+  allActns.errors= errors;
   allActns.num = num;
   allActns.numUnits = numUnits;
 }
 
 
+void printAllActns(char *fname)
+{
+
+
+  /* print all the activations out the file fname.
+   * If fname = "-", then we use stdout.
+   */
+  /*** Local Variables ***/
+  Real	*ops;
+  int numVecs, nCells, vec;
+  FILE *fp;
+  int	usingstdout=0;
+  int	i;
+
+  /* get  the relevant file pointer. */
+  if (strcmp(fname, "-") == 0) {
+    fp = stdout;
+    usingstdout=1;
+  } else {
+    
+    fp = fopen( fname, "w");
+    if (! fp ) {
+      printf("%s: %s could not be opened for writing",
+	     __FUNCTION__, fname);
+      exit(-1);
+    }
+  }
+
+
+  numVecs = allActns.num;
+  nCells = allActns.numUnits;
+  
+  for(vec=0; vec< numVecs; vec++) {
+
+    /* Print the outputs */
+    fprintf(fp, "Outputs: \n");
+    ops = allActns.allOps[vec];
+    for(i=0; i<nCells; i++) {
+      fprintf(fp, "%.4lf ", *ops++);
+    }
+    fprintf(fp, "\n");
+
+
+    /* Print the activations */
+    fprintf(fp, "Activations: \n");
+    ops = allActns.allActs[vec];
+    for(i=0; i<nCells; i++) {
+      fprintf(fp, "%.4lf ", *ops++);
+    }
+    fprintf(fp, "\n");
+
+    /* Print the errors */
+    fprintf(fp, "Errors: \n");
+    ops = allActns.errors[vec];
+    for(i=0; i<nCells; i++) {
+      fprintf(fp, "%.4lf ", *ops++);
+    }
+    fprintf(fp, "\n");
+
+
+  } /* next vector */
+
+  
+  if (!usingstdout) {
+    fclose(fp);
+  }
+
+}
+     
 void freeAllActns()
 {
   /* Clear up the allActns data structure. */
@@ -548,8 +637,15 @@ void createZs()
   createArray( outputWid, outputHt, &z);
   createArray( outputWid, outputHt, &zbar);
   createArray( outputWid, outputHt, &ztilde);
-}
+  createArray( outputWid, outputHt, &ztildeminz);
+  createArray( outputWid, outputHt, &zbarminz);
 
+
+  createArray( outputWid, outputHt, &dudx);
+  createArray( outputWid, outputHt, &dvdx);
+  createArray( outputWid, outputHt, &da);
+  
+}
 
 
 void freeZs()
@@ -557,6 +653,27 @@ void freeZs()
   /* free the z, zbar, and ztilde arrays. */
 
   freeArray(z); freeArray(zbar); freeArray(ztilde);
+  freeArray(zbarminz);
+  freeArray(ztildeminz);
+
+  freeArray(dudx);   freeArray(dvdx);   freeArray(da);
+
+}
+
+void createdw()
+{
+  /* create dw and onedw arrays */
+  int numWeights;
+  numWeights = weightInfo.numWts;
+  createArray( numWeights,1, &dw);
+  createArray( numWeights,1, &onedw);
+}
+
+
+void freedw()
+{
+  /* free the dw and onedw arrays */
+  freeArray(dw); freeArray(onedw);
 }
 
 double arrayDist(Array a1, Array a2)
@@ -590,6 +707,7 @@ double arrayDist(Array a1, Array a2)
   
 }
 
+
 void testArrayDist()
 {
   /* test procedure for arrayDist. */
@@ -608,9 +726,180 @@ void testArrayDist()
   dist = arrayDist(a1, a2);
   printf("dist is %lf\n", dist);
 }
+
+void subArray(Array a1, Array a2, Array result)
+{
+  /* result[k] = a1[k] - a2[k] for all elements k */
+
+  /*** Local Variables ***/
+  int size = a1.wid * a1.ht;
+  Real *a1data, *a2data, *resultdata;
+
+  a1data = a1.data;   a2data = a2.data;  resultdata = result.data;
+
+  for(; size-- > 0; ) {
+    *resultdata = (*a1data - *a2data);
+    a1data++; a2data++;
+    resultdata++;
+  }
+
+}
+
+
+void testSubArray()
+{
+  /* test procedure for subArray */
+  Array a1, a2;
+  Array diff;
+  
+  int wid =3;
+  int ht =2;
+
+  createRndArray(wid, ht, &a1);
+  createRndArray(wid, ht, &a2);
+  createRndArray(wid, ht, &diff);
+
+  subArray( a1, a2, diff); writeArray(a1, "-"); writeArray(a2, "-");
+  writeArray(diff, "-");
+
+  freeArray(a1);
+  freeArray(a2);
+  freeArray(diff);
+}
+
+
+void multArrayInPlace(Array a1, double k)
+{
+  /* Multiply all array elements by k. */
+
+  /*** Local Variables ***/
+  int size = a1.wid * a1.ht;
+  Real *data;
+
+  data = a1.data;
+
+  for(; size-- > 0; ) {
+    *data *= k;
+    data++;
+  }
+
+}
+
+void testMult()
+{
+  /* test the mult procedure for arrays. */
+  
+  Array a1;
+  
+  
+  int wid =3;
+  int ht =2;
+
+  createRndArray(wid, ht, &a1);
+  writeArray(a1, "-");
+
+  multArrayInPlace(a1, 2.0);
+  printf("After:\n");
+  writeArray(a1, "-");
+
+  freeArray(a1);
+}
+
+
+
+void setArray(Array a1, double k)
+{
+  /* Set all elements of array to the value k. */
+
+  /*** Local Variables ***/
+  int size = a1.wid * a1.ht;
+  Real *data;
+
+  data = a1.data;
+
+  for(; size-- > 0; ) {
+    *data = k;
+    data++;
+  }
+
+}
+
+
+void testSetArray()
+{
+  /* test the setArray() function */
+  /* working ok */
+  
+  Array a1;
+  
+  int wid =3;
+  int ht =2;
+
+  createRndArray(wid, ht, &a1);
+  writeArray(a1, "-");
+
+  setArray(a1, 2.0);
+  printf("After:\n");
+  writeArray(a1, "-");
+
+  setArray(a1, 0.0);
+  printf("After:\n");
+  writeArray(a1, "-");
+
+  freeArray(a1);
+
+}
+
+
+void addArrayInPlace(Array a1, Array a2)
+{
+  /* new a1[k] + a2[k] -> a1[k], for each element k.
+   * old value of a1 is overwritten.
+   */
+  
+
+  /*** Local Variables ***/
+  int size = a1.wid * a1.ht;
+  Real *a1data, *a2data;
+
+  a1data = a1.data;   a2data = a2.data;
+
+  for(; size-- > 0; ) {
+    *a1data += *a2data;
+    a1data++; a2data++;
+  }
+}
+
+
+void testAddArrayInPlace()
+{
+  /* test procedure for addArryInPlace() */
+  /* fine */
+  Array a1, a2;
+
+  int wid =3;
+  int ht =2;
+
+  createRndArray(wid, ht, &a1);
+  createRndArray(wid, ht, &a2);
+
+
+  writeArray(a1, "-"); writeArray(a2, "-");
+  addArrayInPlace(a1, a2);
+  printf("New a1 :\n");
+  writeArray(a1, "-");
+
+  freeArray(a1);
+  freeArray(a2);
+}
+
+
 /*************************** Version Log ****************************/
 /*
  * $Log: dispnet.c,v $
+ * Revision 1.4  1995/11/21  02:32:37  stephene
+ * Update - moving towards a merit function
+ *
  * Revision 1.3  1995/11/17  00:04:58  stephene
  * Daily update
  *

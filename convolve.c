@@ -8,13 +8,13 @@
 ***
 *** Created 17 Nov 95
 ***
-*** $Revision$
-*** $Date$
+*** $Revision: 1.1 $
+*** $Date: 1995/11/17 21:03:55 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header$";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/convolve.c,v 1.1 1995/11/17 21:03:55 stephene Exp stephene $";
 #endif
 
 
@@ -26,6 +26,8 @@ static char *rcsid = "$Header$";
 #include "dispnet.h"
 
 /* - Defines - */
+#define MASK1D 1
+
 
 /* - Function Declarations - */
 
@@ -35,6 +37,70 @@ static char *rcsid = "$Header$";
 
 
 /* - Start of Code  - */
+
+void double_convolve_wrap(Array input,
+			  Mask mask,
+			  Array output)
+{
+
+  /* Call the appropriate convolution code, according to whether the
+   * array is one dimensional or two dimensional.  As long as the
+   * dimensions are correct, the input is convolved with the mask to
+   * produce the output.  All arrays must be allocated before calling
+   * this routine.
+   *
+   * If the mask is bigger than the input, then this routine will
+   * produce an error.  */
+  
+  /*** Local Variables ***/
+  int	inputWid, inputHt;
+  Real	*inputData;
+  int	maskWid, maskHt;
+  Real	*maskData;
+  int	maskExtent;
+  
+  int	outputWid, outputHt;
+  Real	*outputData;
+
+  /* Get the sizes of the inputs and the masks. */
+  inputWid = input.wid; inputHt = input.ht; inputData = input.data;
+  maskWid = mask.wid; maskHt = mask.ht; maskData = mask.data;
+  maskExtent = mask.maskExtent;
+  outputData = output.data;
+  
+  if ( maskHt == MASK1D) {
+    if (inputHt == 1) {
+      /* One dimensional convolution */
+      if ( maskWid > inputWid ) {
+	printf("%s: maskWid (%d) must not be greater than inputWid (%d)\n",
+	       __FUNCTION__, maskWid, inputWid);
+	exit(-1);
+      }
+      double_convolve1d_wrap( inputData, inputWid,
+			      maskData, maskWid, maskExtent,
+			      outputData);
+    } else {
+      printf("Error: inputData is one dimensional, but mask is not\n");
+      exit(-1);
+    }
+  } else {
+    /* 2d convolution */
+    if ( maskWid > inputWid ) {
+      printf("%s: maskWid (%d) must not be greater than inputWid (%d)\n",
+	     __FUNCTION__, maskWid, inputWid);
+      exit(-1);
+    }
+    if ( maskHt > inputHt ) {
+      printf("%s: maskHt (%d) must not be greater than inputHt (%d)\n",
+	     __FUNCTION__, maskHt, inputHt);
+      exit(-1);
+    }
+		
+    double_convolve2d_wrap( inputData, inputWid, inputHt,
+			    maskData, maskWid, maskHt,  maskExtent,
+			    outputData);
+  }
+}
 
 void double_convolve2d_wrap(Real *input, int inputWid, int inputHt,
 			  Real *mask, int maskwid, int maskht, int maskextent,
@@ -141,8 +207,9 @@ void double_convolve1d_wrap(Real *input, int inputWid,
     tmask = mask;
     sum=0.0;
     for(mx=0; mx < maskwid; mx++) {
-      printf( "mask %lf  * input %lf = %lf\n", *tmask, input[startcol],
-	     (*tmask * input[startcol]));
+      /*
+       printf( "mask %lf  * input %lf = %lf\n", *tmask, input[startcol],
+	     (*tmask * input[startcol])); */
       sum += (*tmask * input[startcol]);
       tmask++;
       startcol++;
@@ -151,7 +218,7 @@ void double_convolve1d_wrap(Real *input, int inputWid,
       }
     }
     /* Store the result of the convolution */
-    printf("next sum is %lf\n", sum);
+/*     printf("next sum is %lf\n", sum); */
     *result = sum;
     result++;
   } /* next x */
@@ -161,6 +228,9 @@ void double_convolve1d_wrap(Real *input, int inputWid,
 
 /*************************** Version Log ****************************/
 /*
- * $Log$
+ * $Log: convolve.c,v $
+ * Revision 1.1  1995/11/17  21:03:55  stephene
+ * Initial revision
+ *
  */
 

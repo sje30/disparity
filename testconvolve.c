@@ -8,13 +8,13 @@
 ***
 *** Created 17 Nov 95
 ***
-*** $Revision$
-*** $Date$
+*** $Revision: 1.1 $
+*** $Date: 1995/11/17 21:03:47 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header$";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testconvolve.c,v 1.1 1995/11/17 21:03:47 stephene Exp stephene $";
 #endif
 
 /* Simple functions to test the convolve function */
@@ -26,6 +26,7 @@ static char *rcsid = "$Header$";
 
 #include "convolve.h"
 #include "gen.h"
+#include "rnd.h"
 
 /* - Defines - */
 
@@ -40,13 +41,14 @@ void test1d();
 
 
 /* - Start of Code  - */
+#ifdef needmain
 main(int argc, char *argv[])
 {
   printf("hello world\n");
 /*   test1d(); */
   test2d2();
 } /* end of main() */
-
+#endif
 
 void test1d()
 {
@@ -106,9 +108,48 @@ void test2d2()
   printDoubleArray(stdout, output, inputWid, inputHt);
 }
 
+
+
+void testConvolve1d()
+{
+  Array a1, output;
+  Mask m;
+  Real	*data;
+  int wid, ht, i;
   
+  wid = 9; ht=1;
+  
+  createRndArray(wid, ht, &a1);
+  createArray(wid, ht, &output);
+
+  m.wid = wid;
+  m.ht = 1;
+
+  data = (Real*)calloc(wid, sizeof(Real));
+  if (! data) { 
+    printf("%s: could not allocate space for data\n", __FUNCTION__);
+    exit(-1);
+  }
+  m.maskExtent =4;
+  m.data = data;
+
+  for(i=0; i<wid; i++) {
+    a1.data[i] = i;
+    m.data[i] = 2 *i;
+  }
+
+  double_convolve_wrap(a1, m, output);
+  
+  printf("My result: \n");
+  printDoubleArray(stdout, output.data, wid, 1);
+
+}
+
 /*************************** Version Log ****************************/
 /*
- * $Log$
+ * $Log: testconvolve.c,v $
+ * Revision 1.1  1995/11/17  21:03:47  stephene
+ * Initial revision
+ *
  */
 

@@ -51,8 +51,13 @@ This will involve several functions:
 	why use log2 in the half life calcs, rather than ln (natural
 	log) , and if so, where is log2() defined on system?
 
+	What does  batch vs on line correspond to in our learning
+	system.?
+
 	correlation between disparity and output from cells.
 
+
+* writing convolution programs - including wrap around.
 
 Things to do
 ------------
@@ -64,3 +69,9 @@ Things to do
 * Calculate errors for each cell.
 
 * Write the derivative function that creates the derivative at a point.
+
+--
+
+Tue Nov 21 1995
+About to include the CG code and the function checker.
+

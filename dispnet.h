@@ -9,8 +9,8 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.5 $
-*** $Date: 1995/11/17 00:05:31 $
+*** $Revision: 1.6 $
+*** $Date: 1995/11/21 02:32:11 $
 ****************************************************************************/
 
 
@@ -117,6 +117,10 @@ typedef struct {
   int	maxIndex;	/* Maximum index into the weight vector */
   int	numWts;		/* Number of weights allocated.
 			 * ie, last weight stored in data[numWts-1] */
+  int	*preCell;	/* preCell[i] gives the index number of the
+			 * presynaptic cell for the ith weight */
+  int	*postCell;	/* postCell[i] gives the index number of the
+			 * postsynaptic cell for the ith weight */
 } weightInfo_t;
 
 
@@ -186,18 +190,23 @@ typedef struct {
   int	num;
   Real	**allActs;
   Real	**allOps;
+  Real	**errors;
   int	numUnits;
 } allActns_t;
 
 /*
- * allActs is an array of size [0..num-1].  allActs[i] points to an
- * array, which stores the activations for the network when presented
- * with the ith input vector.  allOps[i] stores the array of output
- * values when the network is presented with the ith input vector.
- * Each array allOps[i] and allActs[i] are of size [0..numUnits-1].
+ * allActsn is an array of size [0..num-1].  allActs[i] points to a
+ * structure, containing the activations, outputs and errors for the
+ * input numbered i.
+ *
+ * allOps[i] stores the array of output values when the network is
+ * presented with the ith input vector.  errors[i] stores the error
+ * for cell i.  Each array allOps[i] and allActs[i] are of size
+ * [0..numUnits-1].
  *
  * Relevant functions:
  * createAllActns(), freeAllActns(), storeAllActns().
+ * void printAllActns(char *fname)
  */
 
 /*** Function definitions ***/
@@ -210,17 +219,25 @@ void createArray( int wid, int ht, Array *rarr);
 void createRndArray( int wid, int ht, Array *rarr);
 void freeArray(Array arr);
 void writeArray(Array arr, char *fname);
+void subArray(Array a1, Array a2, Array result);
+void multArrayInPlace(Array a1, double k);
+void setArray(Array a1, double k);
+void addArrayInPlace(Array a1, Array a2);
 
 void setParamDefaults();
 void getParams(char *fname);
 
 void createAllActns();
 void freeAllActns();
+void printAllActns(char *fname);
 void storeActivations(int input);
 
 void getZ();
 void createZs();
 void freeZs();
+
+void createdw();
+void freedw();
 
 
 double arrayDist(Array a1, Array a2);
@@ -239,6 +256,9 @@ layerInfo_t	*layerInfo;
 
 /*************************** Version Log ****************************/
 /* $Log: dispnet.h,v $
+ * Revision 1.6  1995/11/21  02:32:11  stephene
+ * Update - moving towards a merit function
+ *
  * Revision 1.5  1995/11/17  00:05:31  stephene
  * Added new element op to the activation Info array - this stores the
  * actual output from the cells.

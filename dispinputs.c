@@ -9,13 +9,13 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.1 $
-*** $Date: 1995/11/12 23:06:05 $
+*** $Revision: 1.2 $
+*** $Date: 1995/11/17 00:04:26 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispinputs.c,v 1.1 1995/11/12 23:06:05 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispinputs.c,v 1.2 1995/11/17 00:04:26 stephene Exp stephene $";
 #endif
 
 /* Functions to provide the input to the disparity network */
@@ -23,10 +23,14 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispinputs.c,v 1.
 /* -  Include Files - */
 #include <stdio.h>
 #include "dispnet.h"
+#include "dispglobals.h"
+#include "dispvars.h"
+#include "dispinputs.h"
 #include "rnd.h"
 
 /* - Defines - */
 #define INPUTLAYER 0		/* Layer number of the input layer. */
+#define NUMEYES 2		/* Two images, left and right. */
 
 /* - Function Declarations - */
 
@@ -63,6 +67,39 @@ void getInputVector()
 }
 
 
+void getNextInputVector(int vecnum)
+{
+  /* Store the inputVector numbered VECNUM into the activations array.
+   * Bias is set by the function setBiases(), which is called
+   * separately.
+   */
+   
+
+  /*** Local Variables ***/
+  int	i;
+  Real	*actn, *op;
+  int	offset;
+  Real	*ivdata;		/* Pointer to the inputvector data. */
+  
+  i = layerInfo[ INPUTLAYER ].ncells;
+
+  ivdata = &(inputs.data[vecnum *inputs.wid]);
+  
+  offset = actInfo.startLayer[INPUTLAYER]; /* Should be zero. */ 
+  actn = &(actInfo.actn[offset]);
+  op = &(actInfo.op[offset]);
+
+  for(; i-->0; ) {
+    *actn = *ivdata;
+    *op = *actn;		/* Assuming identity function here for the
+				 * input cells*/
+    actn++;
+    op++;
+    ivdata++;
+  }
+}
+
+
 
 void setBiases()
 {
@@ -88,15 +125,19 @@ void setBiases()
 
 void clearActivationArray()
 {
-  /* Reset the activations array, so that all of the elements are 0.0 */
+  /* Reset the activations array, so that all of the elements are 0.0
+   * for both the activations and the outputs*/
+  
   int i;
   Real *actn;			/* Pointer to the activations array */
+  Real *op;			/* Pointer to the output array. */
   i = actInfo.size;
   actn = actInfo.actn;
-  
+  op = actInfo.op;
 
   for(;i-- > 0; ) {
     *actn++ = 0.0;
+    *op++ = 0.0;
   }
 }
 
@@ -105,10 +146,205 @@ void readInData()
   /* Read in the data from the files, along with the shift values. */
   ;
 }
+
+void freeInputsAndShifts()
+{
+  cfree(shifts.data);
+  cfree(inputs.data);
+}
+
+
+void testInputVectors()
+{
+  /* test procedure for reading input vectors and shifts. */
+
+
+  createInputVectorsAndShifts();
+  writeArray(shifts, "shifts.test");
+  writeArray(inputs, "inputs.test");
+
+  freeInputsAndShifts();
+}
+
+
+
+void createInputVectorsAndShifts()
+{
+  /* Create the input vectors to be supplied to the network, and 
+   * the array of shifts. */
+
+  /*** Local Variables ***/  
+  int i;
+  int colstart, rowstart;
+  Array leftVector, rightVector;
+  Array leftImage, rightImage, shiftsArr;
+  int im, elem;
+  int vec; /* Current vector being created. */
+  int inputCentreRow, inputCentreCol;
+  int oneInputSize = inputWid * inputHt;    
+  int inputVectorSize =  NUMEYES * inputWid*inputHt; 
+  Real *shiftsData, *inputsdata, *data;
+
+
+  createArray( inputWid, inputHt, &leftVector);
+  createArray( inputWid, inputHt, &rightVector);
   
+  createArray( totalInputWid, totalInputHt, &leftImage);
+  createArray( totalInputWid, totalInputHt, &rightImage);
+  createArray( totalInputWid, totalInputHt, &shiftsArr);
+  
+  /*** The following two arrays are global variables ***/
+  createArray( inputVectorSize, numInputVectors, &inputs);
+  createArray( numInputVectors, 1, &shifts);
+  shiftsData = shifts.data;
+  
+  readInputFile( image1File, leftImage);
+  readInputFile( image2File, rightImage);
+  readInputFile( shiftsFile, shiftsArr);
+
+  colstart = 0;
+  rowstart = 0;
+  inputsdata = inputs.data;
+  
+  /* Find the centre position of the input vector */
+  inputCentreRow = (inputHt -1)/2;
+  inputCentreCol = (inputWid-1)/2;
+  
+#ifdef debug
+  printf("%s: Centre of input vector: row %d col %d\n", inputCentreRow,
+	 inputCentreCol);
+#endif
+  
+  
+  for(vec=0; vec< numInputVectors; vec++) {
+    extractInputVector(leftImage, leftVector, colstart, rowstart);
+    extractInputVector(rightImage, rightVector, colstart, rowstart);
+	
+    /* Get the relevant shift, by taking the shift value that is
+     * at the centre of the inputVector.
+     */
+    /* The relevant shift element is at 
+     * column colstart + inputCentreRow,
+     * row    rowstart + inputCentreCol
+     */
+
+    elem = ( (rowstart+inputCentreRow) * shiftsArr.wid) +
+      (colstart + inputCentreCol);
+    shifts.data[vec] = shiftsArr.data[elem];
+
+    /* Now store these vectors in the inputs array. */
+    for(im=0; im< NUMEYES; im++) {
+      switch(im) {
+      case 0:
+	data = leftVector.data;
+	break;
+      case 1:
+	data = rightVector.data;
+	break;
+      default:
+	printf("Unknown value of im: %d\n", im);
+	exit(-1);
+	break;
+      }
+
+      for(i=oneInputSize; i-->0;) {
+	*inputsdata++ = *data++;
+      }
+    } /* next image. */
+
+    /* move onto the next vector */
+    colstart += inputWid + inputSkip;
+  }
+  
+  /*** Have now finished creating the input vectors. We can now
+   * free the arrays that are no longer needed.
+   */
+  
+  cfree(leftVector.data); cfree(rightVector.data);
+  cfree(leftImage.data); cfree(rightImage.data);
+  cfree(shiftsArr.data);
+  
+}
+
+
+void extractInputVector(Array source, Array dest,
+			int colstart, int rowstart)
+{
+  /* Fill in the DEST array with elements from the SOURCE array,
+   * with the top left hand corner of the DEST array aligned
+   * to position (colstart, rowstart) in the SOURCE array. */
+
+  /*** Local Variables ***/
+  int destwid, destht;
+  Real *destdata;
+  int x,y;
+  int sourcewid, sourceht, lhsource;
+  Real *sourcedata;
+  Real *sourceindex;
+
+  destwid = dest.wid; destht = dest.ht; destdata = dest.data;
+  sourcewid = source.wid; sourceht = source.ht; sourcedata = source.data;
+  /* work out index to the top left hand corner of the source array
+   * to be copied from. */
+  lhsource = (sourcewid * rowstart) + colstart;	
+
+  for(y=0; y<destht; y++) {
+    sourceindex = &sourcedata[lhsource + (y*source.wid)];
+    for(x=destwid; x-->0;) {
+      *destdata++ = *sourceindex++;
+    }
+  }
+}
+
+
+
+void readInputFile(char *inputFile, Array arr)
+{
+
+  /* Read in the data from one data file, and then store it 
+   * in arr. Space has already been allocated for the array. 
+   */
+
+  /* Maybe should check that enough values were read in to
+   * the array from the file. */
+
+  /*** Local Variables ***/
+  int	x,y;
+  FILE	*fp;
+  int	wid, ht, size;
+  Real	*data;
+  Real	val;
+  
+  wid = arr.wid;
+  ht = arr.ht;
+  data = arr.data;
+  size = wid*ht;
+	
+
+  fp = fopen( inputFile, "r");
+  if (! fp ) {
+    printf("%s: %s could not be opened for reading",
+	   __FUNCTION__, inputFile);
+    exit(-1);
+  }
+
+   for(y=0; y< ht; y++) {
+     for(x=0; x < wid; x++) {
+       fscanf(fp, "%lf", &val);
+       *data++ = val;
+     }
+     fscanf(fp, "\n");		/* end of line terminator? */
+   }
+
+  fclose(fp);
+}
+
 /*************************** Version Log ****************************/
 /*
  * $Log: dispinputs.c,v $
+ * Revision 1.2  1995/11/17  00:04:26  stephene
+ * *** empty log message ***
+ *
  * Revision 1.1  1995/11/12  23:06:05  stephene
  * Initial revision
  *
