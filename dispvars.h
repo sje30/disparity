@@ -9,8 +9,8 @@
 ***
 *** Created 10 Nov 95
 ***
-*** $Revision: 1.4 $
-*** $Date: 1995/12/07 15:42:57 $
+*** $Revision: 1.5 $
+*** $Date: 1995/12/08 20:17:49 $
 ****************************************************************************/
 
 
@@ -49,8 +49,12 @@ char  shiftsFile[100];		/* File for shifts data */
 int numInputVectors;		/* number of input vectors to make
 				   from the total input files. */
 
-int inputSkip;			/* How many columns to skip between
-				   successive input vectors */
+int inputSkipX;			/* How many columns to skip between
+				 * successive input vectors. Default 2.
+				 */
+int inputSkipY; 		/* How many rows to skip between input
+				 * vectors from a 2d image. Default 0.
+				 */
 
 int inputHt; 			/* Height of each input vector from
 				   one image */
@@ -80,6 +84,11 @@ int uhalf, vhalf; 		/* Half lives of U and V */
 
 /*************************** Version Log ****************************/
 /* $Log: dispvars.h,v $
+ * Revision 1.5  1995/12/08  20:17:49  stephene
+ * Adding the code to choose between creating 1d and 2d masks in
+ * setUpNetwork
+ * Adding also the new params useHalf, uhalf and vhalf
+ *
  * Revision 1.4  1995/12/07  15:42:57  stephene
  * post nips sort out
  *
