@@ -9,13 +9,13 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.3 $
-*** $Date: 1995/11/21 23:33:09 $
+*** $Revision: 1.4 $
+*** $Date: 1995/12/11 06:26:16 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispwts.c,v 1.3 1995/11/21 23:33:09 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispwts.c,v 1.4 1995/12/11 06:26:16 stephene Exp stephene $";
 #endif
 
 /********************************************************************/
@@ -236,9 +236,49 @@ void readWts(char *fname)
   fclose(fp);
 }
 
+
+
+void printWtsInfo()
+{
+  /* Print out the weight information to the file weight.info */
+  /* This function adapted from createPartials() */
+  
+  /*** Local Variables ***/  
+  int weight, numWeights;
+  char wtInfo[30];
+  FILE	*fp;
+  int preCell, postCell;
+
+  numWeights = weightInfo.numWts;
+  strcpy(wtInfo, "weight.info");  /* file for storing weight info */
+
+
+  fp = fopen( wtInfo, "w");
+  if (! fp ) {
+    printf("%s: %s could not be opened for writing",
+	   __FUNCTION__, wtInfo);
+    exit(-1);
+  }
+  
+  for(weight=0; weight<numWeights; weight++) {
+    preCell = weightInfo.preCell[weight];
+    postCell = weightInfo.postCell[weight];
+
+    
+    fprintf(fp,"weight %d connects cell %d to cell %d\n",
+	     weight, preCell, postCell);
+
+  }
+  
+  fclose(fp);
+
+}
 /*************************** Version Log ****************************/
 /*
  * $Log: dispwts.c,v $
+ * Revision 1.4  1995/12/11  06:26:16  stephene
+ * *** empty log message ***
+ *
  * Revision 1.3  1995/11/21  23:33:09  stephene
  * About to include CG Code
  *
