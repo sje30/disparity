@@ -7,8 +7,8 @@
 ###
 ### Created 09 Nov 95
 ###
-### $Revision: 1.1 $
-### $Date: 1995/11/09 20:49:41 $
+### $Revision: 1.2 $
+### $Date: 1995/11/10 22:02:09 $
 #############################################################################
 CC = gcc
 
@@ -23,10 +23,13 @@ CLIBDIRS = -L$(HOME)/Clib
 # onto the CFLAGS
 CFLAGS = -ansi -gstabs -g $(CHEADERS) $(CLIBDIRS)
 
-testnet : testnet.o readnet.o readnet.h dispscan.o
-	$(LINK.c) -o testnet testnet.o readnet.o dispscan.o -lm  $(CHEADERS) $(CLIBDIRS)
+testnet : testnet.o readnet.o readnet.h dispscan.o dispinputs.o dispnet.o dispwts.o
+	$(LINK.c) -o testnet testnet.o readnet.o dispscan.o dispwts.o \
+	dispinputs.o dispnet.o \
+	-lm  $(CHEADERS) $(CLIBDIRS)
 
-
+testsig: testsig.o
+	$(LINK.c) -o testsig testsig.o
 # let make automatically build .o file from .l file
 dispscan.c : dispscan.l dispvars.h 
 	lex -t dispscan.l > dispscan.c
@@ -38,14 +41,19 @@ clean:
 
 
 # Use my version of tags.
-TAGS:   readnet.c readnet.h testnet.c
-	etags readnet.c readnet.h testnet.c
+SRCTAGS = readnet.c readnet.h testnet.c dispnet.h dispnet.c dispwts.c \
+dispinputs.c dispinputs.h
+TAGS:   $(SRCTAGS)
+	etags $(SRCTAGS)
 
 
 
 ############################ Version Log #############################
 #
 # $Log: makefile,v $
+# Revision 1.2  1995/11/10  22:02:09  stephene
+# *** empty log message ***
+#
 # Revision 1.1  1995/11/09  20:49:41  stephene
 # Initial revision
 #
