@@ -9,8 +9,8 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.8 $
-*** $Date: 1995/11/23 16:19:52 $
+*** $Revision: 1.9 $
+*** $Date: 1995/12/07 15:42:46 $
 ****************************************************************************/
 
 
@@ -243,6 +243,8 @@ void freedw();
 
 double arrayDist(Array a1, Array a2);
 
+Real Rvec_correlate(Real *x, Real *y, int imin, int imax);
+
 /************************* Global Variables *************************/
 weightInfo_t	weightInfo;
 netInfo_t	netInfo;
@@ -262,6 +264,9 @@ layerInfo_t	*layerInfo;
 
 /*************************** Version Log ****************************/
 /* $Log: dispnet.h,v $
+ * Revision 1.9  1995/12/07  15:42:46  stephene
+ * post nips sort out
+ *
  * Revision 1.8  1995/11/23  16:19:52  stephene
  * CG now installed
  *

@@ -9,13 +9,13 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.6 $
-*** $Date: 1995/11/23 16:20:34 $
+*** $Revision: 1.7 $
+*** $Date: 1995/12/07 15:43:14 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.6 1995/11/23 16:20:34 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.7 1995/12/07 15:43:14 stephene Exp stephene $";
 #endif
 
 
@@ -459,7 +459,9 @@ void calcMeritAndPartials()
   propagateErrors();
 
 
-  printAllActns("allacts2");
+  /*
+   printAllActns("allacts2");
+   */
 
 
   createPartials();
@@ -555,7 +557,16 @@ char finishedFn(Real *wts, int iteration)
 {
   /* Decide whether we have finished? */
   char rval;
+  Real corrn;
 
+  /* Print out the correlation for the fun of it, although at the
+   * moment it is not being used to decide whether to stop running the
+   * program.
+   */
+
+  corrn = Rvec_correlate(z.data, shifts.data, 0, numInputVectors );
+  printf("Correlation %lf\n", corrn);
+    
   /* maxiterations is a global parameter. */
   
   if (iteration > maxiterations) {
@@ -669,6 +680,9 @@ void copyVec(Real *wdest, Real *wsrc, int numWeights)
 /*************************** Version Log ****************************/
 /*
  * $Log: testnet.c,v $
+ * Revision 1.7  1995/12/07  15:43:14  stephene
+ * post nips sort out
+ *
  * Revision 1.6  1995/11/23  16:20:34  stephene
  * CG now installed
  *
