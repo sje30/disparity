@@ -7,13 +7,13 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.8 $
-*** $Date: 1995/12/10 17:55:25 $
+*** $Revision: 1.9 $
+*** $Date: 1995/12/11 06:27:18 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/readnet.c,v 1.8 1995/12/10 17:55:25 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/readnet.c,v 1.9 1995/12/11 06:27:18 stephene Exp stephene $";
 #endif
 
 
@@ -320,11 +320,10 @@ void readNet(char *fname)
 
 
   /* Print out the information in a coherent manner. */
-
-
   printNet();
-
-
+  
+  /* Print out the weight information. */
+  printWtsInfo();
 
 
 }
@@ -846,6 +845,10 @@ void printNet()
   int layer, nopcells;
   int cell, numInputs, ip;
   Real	*wt;
+  int i;
+  FILE	*fp;
+  char *actfile = "actn.info";
+  
   for(layer=0; layer < netInfo.nLayers; layer++) {
     printf("\n\nLayer %d\n",layer);
     
@@ -868,7 +871,7 @@ void printNet()
     }
   } /* Next layer */
 
-  activationcell = 0;
+
   for(layer=0; layer < netInfo.nLayers; layer++) {
     ncols = layerInfo[layer].ncols;
     nrows = layerInfo[layer].nrows;
@@ -885,22 +888,37 @@ void printNet()
     }
   } /* next layer */
 
-  printf("** Activations **\n");
-  for(layer=0; layer < netInfo.nLayers; layer++) {
-    printf("\nLayer %d\n",layer);
-    ncols = layerInfo[layer].ncols;
-    nrows = layerInfo[layer].nrows;
-    for(y=0; y< nrows; y++) {
-      for(x=0; x<ncols; x++) {
-	printf("%2d ", activationcell++);
+  for(i=0; i<2; i++) {
+    activationcell = 0;    
+    if (i==0 ) {
+      fp = stdout;
+    }
+    else {
+      fp = fopen( actfile, "w");
+      if (! fp ) {
+	printf("%s: %s could not be opened for writing",
+	       __FUNCTION__, actfile);
+	exit(-1);
       }
-      printf("\n");
     }
-    if (layerInfo[layer].bias == Bias) {
-      printf("Bias %d\n", activationcell++);
-    }
-  } /* next layer */
-	
+      
+    fprintf(fp,"** Activations **\n");
+    for(layer=0; layer < netInfo.nLayers; layer++) {
+      fprintf(fp,"\nLayer %d\n",layer);
+      ncols = layerInfo[layer].ncols;
+      nrows = layerInfo[layer].nrows;
+      for(y=0; y< nrows; y++) {
+	for(x=0; x<ncols; x++) {
+	  fprintf(fp,"%2d ", activationcell++);
+	}
+	fprintf(fp,"\n");
+      }
+      if (layerInfo[layer].bias == Bias) {
+	fprintf(fp,"Bias %d\n", activationcell++);
+      }
+    } /* next layer */
+  } /* next i */
+  fclose(fp);			/* this should be the file. */
 
 }
 
@@ -909,6 +927,9 @@ void printNet()
 /*************************** Version Log ****************************/
 /*
  * $Log: readnet.c,v $
+ * Revision 1.9  1995/12/11  06:27:18  stephene
+ * *** empty log message ***
+ *
  * Revision 1.8  1995/12/10  17:55:25  stephene
  * *** empty log message ***
  *
