@@ -1,4 +1,4 @@
->/****************************************************************************
+/****************************************************************************
 ***
 *** Time-stamp: <10 Nov 95 21:58:13 stephene>
 ***
@@ -9,8 +9,8 @@
 ***
 *** Created 10 Nov 95
 ***
-*** $Revision: 1.6 $
-*** $Date: 1995/12/10 17:55:00 $
+*** $Revision: 1.7 $
+*** $Date: 1995/12/11 06:26:04 $
 ****************************************************************************/
 
 
@@ -110,6 +110,9 @@ int doLearning;			/* If non zero (default), then do
 
 /*************************** Version Log ****************************/
 /* $Log: dispvars.h,v $
+ * Revision 1.7  1995/12/11  06:26:04  stephene
+ * new params: initWts, doLearning, results
+ *
  * Revision 1.6  1995/12/10  17:55:00  stephene
  * skipInput changed to skipInputX and skipInputY
  *
