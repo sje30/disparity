@@ -9,8 +9,8 @@
 ***
 *** Created 10 Nov 95
 ***
-*** $Revision: 1.2 $
-*** $Date: 1995/11/21 23:33:01 $
+*** $Revision: 1.3 $
+*** $Date: 1995/11/23 16:20:04 $
 ****************************************************************************/
 
 
@@ -65,11 +65,17 @@ int checker;			/* Do we use conjugate gradient or
 				 * zero means that we check.
 				 * Default: 1.
 				 */
+
+int maxiterations;		/* Maximum number of iterations for CG
+				 * to perform.  Default is 100. */
 #endif
 
 
 /*************************** Version Log ****************************/
 /* $Log: dispvars.h,v $
+ * Revision 1.3  1995/11/23  16:20:04  stephene
+ * CG now installed
+ *
  * Revision 1.2  1995/11/21  23:33:01  stephene
  * About to include CG Code
  *

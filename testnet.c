@@ -9,13 +9,13 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.5 $
-*** $Date: 1995/11/21 23:34:02 $
+*** $Revision: 1.6 $
+*** $Date: 1995/11/23 16:20:34 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.5 1995/11/21 23:34:02 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.6 1995/11/23 16:20:34 stephene Exp stephene $";
 #endif
 
 
@@ -134,16 +134,18 @@ the dimensionality of the input vectors (%d)\n",
     storeActivations(vecnum);
   }
   getZ();
+#ifdef dumpArrays
   writeArray(z, "z");
-
+#endif
+  
   /* Create the zbar and ztilde arrays by convolution. */
 
   double_convolve_wrap(z, uMask, ztilde);
   double_convolve_wrap(z, vMask, zbar);
-
+#ifdef dumpArrays
   writeArray(zbar, "zbar");
   writeArray(ztilde, "ztilde");
-
+#endif
 
   u = arrayDist(z, ztilde);
   v = arrayDist(z, zbar);
@@ -156,9 +158,11 @@ the dimensionality of the input vectors (%d)\n",
   subArray(zbar, z, zbarminz);
   subArray(ztilde, z, ztildeminz);
 
+#ifdef dumpArrays
   writeArray(zbarminz, "zbarminz");
   writeArray(ztildeminz, "ztildeminz");
-
+#endif
+  
   /* now create dU/dX and dV/dX by convolution. */
   double_convolve_wrap(ztildeminz,
 		       uMaskD,
@@ -169,30 +173,39 @@ the dimensionality of the input vectors (%d)\n",
 		       vMaskD,
 		       dvdx);
 
+#ifdef dumpArrays  
   writeArray(dudx, "dudx");
   writeArray(dvdx, "dvdx");	
-
+#endif
+  
   v1 = 1.0 / v;
   u1 = 1.0 / u;
 
-  printf("1/u %lf 1/v %lf \n", u1, v1);
+/*   printf("1/u %lf 1/v %lf \n", u1, v1); */
 
   multArrayInPlace( dudx, u1);
   multArrayInPlace( dvdx, v1);
 
   subArray(dvdx, dudx, da);
-
+#ifdef dumpArrays
   writeArray(da, "da");
-  
+#endif
   /* da = dF/dx_a  = 1/v dV/Dx_a - 1/u dU/dx_a */
 
 
+#ifdef dumpArrays
   printAllActns("allacts");
+#endif
+  
   storeTopLayerErrors(da);
 
   propagateErrors();
 
+
+#ifdef dumpArrays
   printAllActns("allacts2");
+#endif
+  
   createPartials();
   clearUpMemory();
 
@@ -268,6 +281,15 @@ netmain(int argc, char *argv[])
 
   setUpNetwork( argv[1]);
 
+
+  opfp = fopen( "dispoutputs", "w");
+  if (! opfp ) {
+    printf("%s: %s could not be opened for writing",
+	   __FUNCTION__, "dispoutputs");
+    exit(-1);
+  }
+
+  
   maxWtIndex = weightInfo.numWts - 1;
 /*  
   f = evalFn(weightInfo.data);
@@ -309,6 +331,9 @@ netmain(int argc, char *argv[])
   /*** End of training ***/
   clearUpMemory();
 
+
+  /* Close the output file printing diagnostic information */
+  fclose(opfp);
   /*     iteration(); */
 } 
 
@@ -348,22 +373,26 @@ void calcMeritAndPartials()
     getNextInputVector(vecnum);
     
     calcAllActivations();
-    showAllActivations();
+/*     showAllActivations(); */
 /*    showGnuplot(); */
 
     storeActivations(vecnum);
   }
   getZ();
+#ifdef dumpArrays
   writeArray(z, "z");
-
+#endif
+  
   /* Create the zbar and ztilde arrays by convolution. */
 
   double_convolve_wrap(z, uMask, ztilde);
   double_convolve_wrap(z, vMask, zbar);
 
+#ifdef dumpArrays
   writeArray(zbar, "zbar");
   writeArray(ztilde, "ztilde");
-
+#endif
+  
   /******************************/
   /*** - Calculate U, V and F ***/
   /******************************/
@@ -388,9 +417,11 @@ void calcMeritAndPartials()
   subArray(zbar, z, zbarminz);
   subArray(ztilde, z, ztildeminz);
 
+#ifdef dumpArrays
   writeArray(zbarminz, "zbarminz");
   writeArray(ztildeminz, "ztildeminz");
-
+#endif
+  
   /* now create dU/dX and dV/dX by convolution. */
   double_convolve_wrap(ztildeminz,
 		       uMaskD,
@@ -400,10 +431,11 @@ void calcMeritAndPartials()
   double_convolve_wrap(zbarminz,
 		       vMaskD,
 		       dvdx);
-
+#ifdef dumpArrays
   writeArray(dudx, "dudx");
   writeArray(dvdx, "dvdx");	
-
+#endif
+  
   v1 = 1.0 / v;
   u1 = 1.0 / u;
 
@@ -413,18 +445,23 @@ void calcMeritAndPartials()
   multArrayInPlace( dvdx, v1);
 
   subArray(dvdx, dudx, da);
-
+#ifdef dumpArrays
   writeArray(da, "da");
+#endif
   
   /* da = dF/dx_a  = 1/v dV/Dx_a - 1/u dU/dx_a */
 
-
+#ifdef dumpArrays
   printAllActns("allacts");
+#endif
   storeTopLayerErrors(da);
 
   propagateErrors();
 
+
   printAllActns("allacts2");
+
+
   createPartials();
 
 }
@@ -518,7 +555,10 @@ char finishedFn(Real *wts, int iteration)
 {
   /* Decide whether we have finished? */
   char rval;
-  if (iteration > 20) {
+
+  /* maxiterations is a global parameter. */
+  
+  if (iteration > maxiterations) {
     rval =1;
   }
   else {
@@ -580,6 +620,8 @@ void setParamDefaults()
 
   cgmax = 1;			/* By default, we will maximise function. */
   checker = 1;			/* Check code rather than use CG to learn. */
+
+  maxiterations = 100;
 }
 
 void printParams()
@@ -606,7 +648,9 @@ void printParams()
   printf("inputWid = %d\n", inputWid);
 
   printf("cgmax = %d\n", cgmax);
-  printf("checker = %d\n", checker); 
+  printf("checker = %d\n", checker);
+
+  printf("maxiterations = %d\n", maxiterations); 
 }
 
 
@@ -625,6 +669,9 @@ void copyVec(Real *wdest, Real *wsrc, int numWeights)
 /*************************** Version Log ****************************/
 /*
  * $Log: testnet.c,v $
+ * Revision 1.6  1995/11/23  16:20:34  stephene
+ * CG now installed
+ *
  * Revision 1.5  1995/11/21  23:34:02  stephene
  * About to include CG Code
  *

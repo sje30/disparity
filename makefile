@@ -7,8 +7,8 @@
 ###
 ### Created 09 Nov 95
 ###
-### $Revision: 1.4 $
-### $Date: 1995/11/21 23:33:29 $
+### $Revision: 1.5 $
+### $Date: 1995/11/23 16:20:26 $
 #############################################################################
 CC = gcc
 
@@ -17,16 +17,16 @@ CHEADERS = -I$(HOME)/Clib
 
 #Place to look for libraries.
 CLIBDIRS = -L$(HOME)/Clib
-
+OPTS = -msupersparc -O3
 # Default rule for turning .c files into .o files uses the $CFLAGS 
 # So, to get make to include my library, just add the -I and -L paths
 # onto the CFLAGS
-CFLAGS = -ansi -gstabs -g $(CHEADERS) $(CLIBDIRS)
+CFLAGS = -ansi -gstabs -g $(OPTS) $(CHEADERS) $(CLIBDIRS)
 
 testnet : testnet.o readnet.o readnet.h dispscan.o dispinputs.o \
 	 dispnet.o dispwts.o dispmasks.o  convolve.o testconvolve.o \
 	disperrors.o cg_williams_module.o bp_check_deriv.o
-	$(LINK.c) -o $(HOME)/bin/testnet \
+	$(LINK.c) $(OPTS) -o $(HOME)/bin/testnet \
 	testnet.o readnet.o dispscan.o dispwts.o \
 	dispinputs.o dispnet.o dispmasks.o convolve.o testconvolve.o \
 	disperrors.o cg_williams_module.o bp_check_deriv.o \
@@ -71,6 +71,9 @@ tags.testconvolve: testconvolve.c convolve.c
 ############################ Version Log #############################
 #
 # $Log: makefile,v $
+# Revision 1.5  1995/11/23  16:20:26  stephene
+# CG now installed
+#
 # Revision 1.4  1995/11/21  23:33:29  stephene
 # About to include CG Code
 #

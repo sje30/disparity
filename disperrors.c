@@ -8,13 +8,13 @@
 ***
 *** Created 21 Nov 95
 ***
-*** $Revision: 1.1 $
-*** $Date: 1995/11/21 23:30:07 $
+*** $Revision: 1.2 $
+*** $Date: 1995/11/23 16:19:33 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/disperrors.c,v 1.1 1995/11/21 23:30:07 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/disperrors.c,v 1.2 1995/11/23 16:19:33 stephene Exp stephene $";
 #endif
 
 
@@ -259,22 +259,29 @@ void createPartials()
     }
 
     /* save this array */
-/*
+#ifdef dumpArrays
     sprintf(string, "onedw.%d", vec);
     writeArray(onedw, string);
-*/
+#endif
+    
     /* add this result to the dw partials vector. */
     addArrayInPlace(dw, onedw);
   }
 
   /* dw now created. */
+#ifdef dumpArrays
   writeArray(dw, "dw");
+#endif
+
 }
 
   
 /*************************** Version Log ****************************/
 /*
  * $Log: disperrors.c,v $
+ * Revision 1.2  1995/11/23  16:19:33  stephene
+ * CG now installed
+ *
  * Revision 1.1  1995/11/21  23:30:07  stephene
  * Initial revision
  *

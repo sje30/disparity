@@ -9,8 +9,8 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.7 $
-*** $Date: 1995/11/21 23:32:47 $
+*** $Revision: 1.8 $
+*** $Date: 1995/11/23 16:19:52 $
 ****************************************************************************/
 
 
@@ -252,11 +252,19 @@ layerInfo_t	*layerInfo;
 
 
 
+/***  Define Statements ***/
+#undef dumpArrays		/* Do we want to output all of the
+				 * weights and so on every time?  If
+				 * so, define dumpArrays */
+
 #endif
 
 
 /*************************** Version Log ****************************/
 /* $Log: dispnet.h,v $
+ * Revision 1.8  1995/11/23  16:19:52  stephene
+ * CG now installed
+ *
  * Revision 1.7  1995/11/21  23:32:47  stephene
  * About to include CG Code
  *

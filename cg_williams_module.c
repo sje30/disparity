@@ -40,7 +40,8 @@
  * One of the calls to applyfunction2 was wrong. (Pointer not needed)
  *
  */
- 
+
+
 #include <math.h>
 #include <stdio.h>
 #include "cg_williams_module.h"
@@ -52,7 +53,13 @@
 #define RHO_MIN 0.25
 #define RHO_MAX 0.75
 
-#define VERBOSE_TRAINING FALSE
+#define VERBOSE_TRAINING TRUE /* sje mod to TRUE */
+
+
+extern FILE *opfp;
+#include "dispnet.h"
+
+extern Array z, zbar, ztilde;
 
 int
 cg_williams(w_orig, imin, imax, func, dfunc, finished)
@@ -105,6 +112,8 @@ SEARCH DIRECTION */
     int                     counter=0, fin=FALSE;
     int                 reset_search_dir=FALSE;
 
+    char		opstr[80];
+
     len = imax-imin+1;
     Smax = len;
 
@@ -136,7 +145,26 @@ SEARCH DIRECTION */
         {
         NEWLINE;
         printf("Line search number = %d E=%.6lf\n",iter,E0); /* sje mod*/
-        iter ++;
+
+	if (opfp != NULL) {
+	  fprintf(opfp, "Line search number = %d E=%.6lf\n",iter,E0);
+	  fflush(opfp);
+	}
+
+	if ( (iter %10 ) == 0) {
+	  sprintf(opstr, "z.%d", iter);
+	  writeArray(z, opstr);
+
+	  sprintf(opstr, "zbar.%d", iter);
+	  writeArray(zbar, opstr);
+
+
+	  sprintf(opstr, "ztilde.%d", iter);
+	  writeArray(ztilde, opstr);
+
+	}
+	
+	iter ++;
 
          /* STEP 1 */
         if (success)    /* IFF LAST ITERATION REDUCED E */
@@ -416,19 +444,22 @@ eval*/
 ***
 *** Created 23 Nov 95
 ***
-*** $Revision$
-*** $Date$
+*** $Revision: 1.1 $
+*** $Date: 1995/11/23 16:29:51 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header$";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/cg_williams_module.c,v 1.1 1995/11/23 16:29:51 stephene Exp stephene $";
 #endif
 
 
 
 /*************************** Version Log ****************************/
 /*
- * $Log$
+ * $Log: cg_williams_module.c,v $
+ * Revision 1.1  1995/11/23  16:29:51  stephene
+ * Initial revision
+ *
  */
 
