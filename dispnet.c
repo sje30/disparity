@@ -9,13 +9,13 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.9 $
-*** $Date: 1996/01/16 01:27:39 $
+*** $Revision: 1.10 $
+*** $Date: 1998/03/24 17:42:57 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /home/stephen/disparity/dispnet.c,v 1.9 1996/01/16 01:27:39 stephene Exp stephen $";
+static char *rcsid = "$Header: /home/stephen/disparity/dispnet.c,v 1.10 1998/03/24 17:42:57 stephen Exp stephen $";
 #endif
 
 /* Main code file for the Disparity net. */
@@ -316,23 +316,6 @@ void showGnuplot()
   }
 }
 
-/*** Conversion between half life and lambda ***/
-
-Real half_life2lambda(Real h)
-{		
-  Real lambda;
-	
-  lambda = pow(2.72,(-1.0/h));
-  return(lambda);
-}
-
-Real lambda2half_life(Real lam)
-{	
-  Real h, L;
-  L = log(lam);
-  h = -1.0/L;
-  return(h);
-}
 
 
 /********************* Array Creation Functions *********************/
