@@ -7,13 +7,13 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.10 $
-*** $Date: 1995/12/13 03:44:19 $
+*** $Revision: 1.11 $
+*** $Date: 1996/01/16 01:27:43 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/readnet.c,v 1.10 1995/12/13 03:44:19 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsunx/home/stephene/disparity/readnet.c,v 1.11 1996/01/16 01:27:43 stephene Exp stephene $";
 #endif
 
 
@@ -23,17 +23,19 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/readnet.c,v 1.10 
 
 /* - Include Files - */
 #include <stdio.h>
+#include <string.h>
 #include "dispnet.h"
 #include "readnet.h"
 #include "rnd.h"
 #include "dispwts.h"
 #include "dispdefines.h"
+#include <pwd.h>       /* Globify:for getpwnam() prototype and passwd struct */
 /* - Defines - */
 
 #define TWODTOONED(x,y,wid) ( (wid)*(y) + (x))
 
 /* - Function Declarations - */
-
+int Globify(char *fname);
 
 /* - Global Variables - */ 
 
@@ -80,10 +82,18 @@ void readNet(char *fname)
   int      	nLayers;
   int      	layernum, wid, ht;
   int      	ncols, nrows;
-
+  char 		globnm[255];
 
 
   createWeights(MAX_NUM_WEIGHTS);
+
+  
+  if (fname[0] == '~') {
+    strcpy(globnm, fname);
+    Globify(globnm);
+    fname = globnm;
+    printf("%s: filename expanded to %s\n", __FUNCTION__, fname);
+  }
 
   structFP = fopen( fname, "r");
   if (! structFP ) {
@@ -327,6 +337,59 @@ void readNet(char *fname)
   printWtsInfo();
 
 
+}
+
+
+int Globify(char *fname)
+{
+  /* This function was taken from xvdir.c from the xv distribution.
+  **/
+  
+  /* expands ~s in file names.  Returns the name inplace 'name'.
+   *  returns 0 if okay, 1 if error occurred (user name not found).
+   *
+   * copied across Mon Jan 22 1996
+   * works ok.
+   */
+   
+#define MAXFNLEN 100
+  struct passwd *entry;
+  char *cp, *sp, *up, uname[64], tmp[MAXFNLEN+100];
+
+#ifdef VMS
+  return 1;
+#else
+  if (*fname != '~') return 0; /* doesn't start with a tilde, don't expand */
+
+  /* look for the first '/' after the tilde */
+  sp = (char *) strchr(fname,'/');
+  if (sp == 0) {               /* no '/' after the tilde */
+    sp = fname+strlen(fname);  /* sp = end of string */
+  }
+
+  /* uname equals the string between the ~ and the / */
+  for (cp=fname+1,up=uname; cp<sp; *up++ = *cp++);
+  *up='\0';
+
+  if (*uname=='\0') { /* no name.  substitute ~ with $HOME */
+    char *homedir;
+    homedir = (char *) getenv("HOME");  
+    if (homedir == NULL) homedir = ".";
+    strcpy(tmp,homedir);
+    strcat(tmp,sp);
+  }
+
+  else {              /* get password entry for uname */
+    entry = getpwnam(uname);
+    if (entry==0) return 1;       /* name not found */
+    strcpy(tmp,entry->pw_dir);
+    strcat(tmp,sp);
+    endpwent();
+  }
+
+  strcpy(fname,tmp);  /* return expanded file name */
+  return 0;
+#endif  /* !VMS */
 }
 
 void freeCellInfo()
@@ -926,45 +989,3 @@ void printNet()
 
 }
 
-
-	  
-/*************************** Version Log ****************************/
-/*
- * $Log: readnet.c,v $
- * Revision 1.10  1995/12/13  03:44:19  stephene
- * mod to printNet so that it writes out actn.info file to show how the
- * cells are numbered.
- *
- * Revision 1.9  1995/12/11  06:27:18  stephene
- * *** empty log message ***
- *
- * Revision 1.8  1995/12/10  17:55:25  stephene
- * *** empty log message ***
- *
- * Revision 1.7  1995/11/21  23:33:39  stephene
- * About to include CG Code
- *
- * Revision 1.6  1995/11/17  00:07:09  stephene
- * calcActivation: changed so that it looks in the .op array rather than
- * the actn array.
- *
- * Revision 1.5  1995/11/13  22:09:57  stephene
- * connectCells() updated so that it can work out which output cells
- * connect to an input cell.
- *
- * Revision 1.4  1995/11/12  23:36:46  stephene
- * Daily change
- *
- * Revision 1.3  1995/11/10  22:02:33  stephene
- * about to make a snapshot
- *
- * Revision 1.2  1995/11/10  15:28:36  stephene
- * Daily update - next major step is to present net with input and
- * calculate activations.
- *
- * Will also need to initialise weights.
- *
- * Revision 1.1  1995/11/09  20:48:36  stephene
- * Initial revision
- *
- */
