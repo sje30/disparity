@@ -9,13 +9,13 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.10 $
-*** $Date: 1995/12/10 17:55:45 $
+*** $Revision: 1.11 $
+*** $Date: 1995/12/11 06:27:37 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.10 1995/12/10 17:55:45 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.11 1995/12/11 06:27:37 stephene Exp stephene $";
 #endif
 
 
@@ -39,6 +39,8 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.10 
 #define dumpCorrn
 
 /* - Function Declarations - */
+void createLayerOpFiles();
+void checkNetSize();
 extern int	yylex();
 double evalMeritFunction();
 static void printParams();
@@ -234,7 +236,13 @@ void setUpNetwork(char *paramFile)
 
 /*   printPreCellInfo();  */
 
-  createInputVectorsAndShifts();
+
+  if (oneImage) {
+    createInputVectorsAndShiftsOneImage();
+  } else {
+    createInputVectorsAndShifts();
+  }
+
 
   writeArray(shifts, "shifts.test");
   writeArray(inputs, "inputs.test");
@@ -248,8 +256,10 @@ the dimensionality of the input vectors (%d)\n",
     exit(-1);
   }
 
-
-/*   setUpGnuplot(); */
+  if (usegnuplot) {
+    setUpGnuplot();
+  }
+  
   createZs();
 
 
@@ -309,6 +319,10 @@ netmain(int argc, char *argv[])
 
   setUpNetwork( argv[1]);
 
+
+  /* Check the network configuration */
+  checkNetSize();
+  
   /* Decide if we want to do learning, or just test the performance of
    * the network on the input images */
 
@@ -410,7 +424,10 @@ void calcMeritAndPartials()
     
     calcAllActivations();
 /*     showAllActivations(); */
-/*    showGnuplot(); */
+    if (usegnuplot) {
+      createLayerOpFiles();
+      showGnuplot();
+    }
 
     storeActivations(vecnum);
   }
@@ -504,7 +521,66 @@ void calcMeritAndPartials()
 
 }
 
+void createLayerOpFiles()
+{
+  /* Create the output files for gnuplot to plot */
+  /* Will create files layer<n>.op and layer<n>.act
+   * for all layers
+   */
 
+  /*** Local Variables ***/
+
+  FILE	*actfp;
+  FILE	*opfp;  
+  int layer;
+  char opfile[80], actfile[80];
+  int ncells, cellnum, i;
+  
+  for(layer=0; layer< netInfo.nLayers; layer++) {
+    sprintf(opfile, "layer%d.op", layer);
+    sprintf(actfile, "layer%d.act", layer);
+
+
+    opfp = fopen( opfile, "w");
+    if (! opfp ) {
+      printf("%s: %s could not be opened for writing",
+	     __FUNCTION__, opfile);
+      exit(-1);
+    }
+
+    actfp = fopen( actfile, "w");
+    if (! actfp ) {
+      printf("%s: %s could not be opened for writing",
+	     __FUNCTION__, actfile);
+      exit(-1);
+    }
+
+
+    /* print the state of cells in layer LAYER */
+    ncells = layerInfo[layer].ncells;
+    cellnum = actInfo.startLayer[layer];
+    printf("layer %d has %d cells, starting at location %d\n",
+	   layer, ncells,  cellnum);
+    for(i=0; i< ncells; i++) {
+      fprintf(opfp, "%f\n", actInfo.op[cellnum]);
+      fprintf(actfp, "%f\n", actInfo.actn[cellnum]);
+      cellnum++;
+    }
+    if (layerInfo[layer].bias == Bias ) {
+      cellnum = actInfo.biasIndex[layer];
+      printf("bias cell at loc %d\n", cellnum);
+      fprintf(opfp, "%f\n", actInfo.op[cellnum]);
+      fprintf(actfp, "%f\n", actInfo.actn[cellnum]);
+    }      
+
+
+    fclose(actfp);
+    fclose(opfp);
+  } /* next layer */
+    
+  exit(-1);
+  
+}
 
 
 double evalFn2(Real *wts)
@@ -589,6 +665,50 @@ void evalPartials(Real *wts, Real *derivs)
 }
 
 
+void checkNetSize()
+{
+  /* Check to see if the network is set up ok. There should be a
+  ** certain relationshp between the number of input vectors, the
+  ** number of cells  in the output layer of the net, and the number
+  ** of cells in the virtual output array
+  */
+
+  int oplayer, opwid, opht;
+  int zwid, zht;
+  int nVirtualBlocks;
+  
+  oplayer = netInfo.nLayers-1;
+  opwid = layerInfo[oplayer].ncols;
+  opht =  layerInfo[oplayer].nrows;
+  printf("real net: op layer is layer %d, %d wide by %d high\n",
+	 oplayer, opwid, opht);
+
+  zht = z.ht; zwid = z.wid;
+  printf("Virtual array is %d wide by %d high\n", zwid, zht);
+
+
+  nVirtualBlocks = (zht / opht ) * (z.wid / opwid);
+  printf("I think there are %d virtual blocks\n", nVirtualBlocks);
+
+  
+  if ( z.ht % opht ) {
+    printf("%s: error - z.ht (%d)  must be exactly divisible by oplayer.ht (%d)
+\n", __FUNCTION__, z.ht, opht);
+    exit(-1);
+  }
+  
+  if ( z.wid % opwid ) {
+    printf("%s: error - z.wid (%d) must be exactly divisible by oplayer.wid (%d) \n", __FUNCTION__, z.wid, opwid);
+    exit(-1);
+  }
+
+  if (nVirtualBlocks != numInputVectors) {
+    printf("%s: Error: I think nVirtualBlocks (%d) should equal numInputVectors (%d)\n", __FUNCTION__, nVirtualBlocks, numInputVectors);
+    exit(-1);
+  }
+  
+}
+  
 char finishedFn(Real *wts, int iteration)
 {
   /* Decide whether we have finished? */
@@ -610,26 +730,27 @@ char finishedFn(Real *wts, int iteration)
    * moment it is not being used to decide whether to stop running the
    * program.
    */
-
-  corrn = Rvec_correlate(z.data, shifts.data, 0, numInputVectors );
-  printf("Correlation %lf\n", corrn);
+  /* Decide if we want to output the correlation */
+  if (compcorrn) {
+    corrn = Rvec_correlate(z.data, shifts.data, 0, numInputVectors );
+    printf("Correlation %lf\n", corrn);
 
 #ifdef dumpCorrn
-  if (corrnfp == NULL ) {
-    /* open up corrn file */
-    corrnfp = fopen( "corrn.dat", "w");
-    if (! corrnfp ) {
-      printf("%s: %s could not be opened for writing",
-	     __FUNCTION__, "corrn.dat");
-      exit(-1);
+    if (corrnfp == NULL ) {
+      /* open up corrn file */
+      corrnfp = fopen( "corrn.dat", "w");
+      if (! corrnfp ) {
+	printf("%s: %s could not be opened for writing",
+	       __FUNCTION__, "corrn.dat");
+	exit(-1);
+      }
     }
-  }
 
-  fprintf(corrnfp, "%lf\n", corrn);
-  fflush(corrnfp);
+    fprintf(corrnfp, "%lf\n", corrn);
+    fflush(corrnfp);
     
 #endif
-    
+  }
   /* maxiterations is a global parameter. */
   
   if (iteration > maxiterations) {
@@ -705,7 +826,10 @@ void setParamDefaults()
 
   strcpy(initWts, "none");
   strcpy(results, "results");
-  doLearning = 1; 
+  doLearning = 1;
+  oneImage = 0;
+  compcorrn = 1;
+  usegnuplot = 0;
 }
 
 void printParams()
@@ -743,7 +867,10 @@ void printParams()
 
   printf("initWts = %s\n", initWts);
   printf("results = %s\n", results); 
-  printf("doLearning = %d\n", doLearning); 
+  printf("doLearning = %d\n", doLearning);
+  printf("oneImage = %d\n", oneImage);
+  printf("compcorrn = %d\n", compcorrn);
+  printf("usegnuplot = %d\n", usegnuplot); 
 }
 
 
@@ -763,6 +890,8 @@ void checkNetPerformance()
 {
   /* Just read in the initial weights and run the input images through
    * the network to see how the network performs.
+   *
+   * We dont do any learning here.
    */
 
 
@@ -818,6 +947,9 @@ void checkNetPerformance()
 /*************************** Version Log ****************************/
 /*
  * $Log: testnet.c,v $
+ * Revision 1.11  1995/12/11  06:27:37  stephene
+ * *** empty log message ***
+ *
  * Revision 1.10  1995/12/10  17:55:45  stephene
  * Looking at 2d networks now.
  *
