@@ -7,13 +7,13 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.4 $
-*** $Date: 1995/11/12 23:36:46 $
+*** $Revision: 1.5 $
+*** $Date: 1995/11/13 22:09:57 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/readnet.c,v 1.4 1995/11/12 23:36:46 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/readnet.c,v 1.5 1995/11/13 22:09:57 stephene Exp stephene $";
 #endif
 
 
@@ -418,6 +418,7 @@ void createActivationArray()
   /* Create the activation array and set up the other data structures */
   /*** Local Variables ***/
   Real	*actn;
+  Real	*op;
   int cellnum;
   int	*biasIndex;
   int nLayers;
@@ -468,10 +469,19 @@ void createActivationArray()
   }
 
 
+  op = (Real*)calloc(cellnum, sizeof(Real));
+  if (! op) { 
+    printf("%s: could not allocate space for op\n", __FUNCTION__);
+    exit(-1);
+  }
+
+  
+
   actInfo.size = cellnum;
   actInfo.startLayer = startLayer;
   actInfo.biasIndex = biasIndex;
   actInfo.actn = actn;
+  actInfo.op = op;
 
 }
 
@@ -496,7 +506,8 @@ void freeActivationsArray()
      the data structures are no longer needed. */
 
   
-  cfree(actInfo.actn); 
+  cfree(actInfo.actn);
+  cfree(actInfo.op);
   cfree(actInfo.startLayer); 
   cfree(actInfo.biasIndex);
 }
@@ -628,7 +639,7 @@ void connectCells(int sourceLayer, int unitnum, int destLayer, Rect rect)
 	; /* do nothing */
       }
       cellinputs[inputnum] = (inputOffset + inputcell);
-      ptrInputs[inputnum] = &(actInfo.actn[inputOffset + inputcell]);
+      ptrInputs[inputnum] = &(actInfo.op[inputOffset + inputcell]);
       inputnum++;
 
       /* Fill in pre synaptic cell info */
@@ -645,7 +656,7 @@ void connectCells(int sourceLayer, int unitnum, int destLayer, Rect rect)
   if (needbias) {
     /* Add the input from the bias cell */
     cellinputs[inputnum] = actInfo.biasIndex[sourceLayer];
-    ptrInputs[inputnum] = &(actInfo.actn[actInfo.biasIndex[sourceLayer]]);
+    ptrInputs[inputnum] = &(actInfo.op[actInfo.biasIndex[sourceLayer]]);
     nextwt = nextFreeWeight();
 
     /* Fill in pre synaptic cell info */
@@ -864,6 +875,10 @@ void printNet()
 /*************************** Version Log ****************************/
 /*
  * $Log: readnet.c,v $
+ * Revision 1.5  1995/11/13  22:09:57  stephene
+ * connectCells() updated so that it can work out which output cells
+ * connect to an input cell.
+ *
  * Revision 1.4  1995/11/12  23:36:46  stephene
  * Daily change
  *
