@@ -9,8 +9,8 @@
 ***
 *** Created 10 Nov 95
 ***
-*** $Revision: 1.8 $
-*** $Date: 1995/12/13 04:04:04 $
+*** $Revision: 1.9 $
+*** $Date: 1996/01/16 01:27:40 $
 ****************************************************************************/
 
 
@@ -113,11 +113,19 @@ int compcorrn;			/* Do we want to compute correlation?
 int usegnuplot;			/* Should we use gnuplot to display
 				 * network activity? If non zero, then
 				 * use gnuplot. Default: 0.  */
+int seed;			/* If non-zero, use this value as the seed.
+				 * Otherwise, clock used to set seed.
+				 * Default 0.
+				 */
 #endif
 
 
 /*************************** Version Log ****************************/
 /* $Log: dispvars.h,v $
+ * Revision 1.9  1996/01/16  01:27:40  stephene
+ * now have the code in place so that weight sharing can be done or left
+ * out.
+ *
  * Revision 1.8  1995/12/13  04:04:04  stephene
  * *** empty log message ***
  *
