@@ -9,13 +9,13 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision$
-*** $Date$
+*** $Revision: 1.1 $
+*** $Date: 1995/11/12 23:37:48 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header$";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispnet.c,v 1.1 1995/11/12 23:37:48 stephene Exp stephene $";
 #endif
 
 /* Main code file for the Disparity net. */
@@ -232,8 +232,11 @@ void clearUpMemory()
 
   /* Should clear up all the space allocated to the cellInfo structures */
   freeWeights();
-  cfree(layerInfo);
+
   freeActivationsArray();
+  freePreCellInfo();
+  freeCellInfo();		/* Free up cellInfo before layerInfo */
+  cfree(layerInfo);
 }
 
 void setUpGnuplot()
@@ -255,6 +258,9 @@ void showGnuplot()
 }
 /*************************** Version Log ****************************/
 /*
- * $Log$
+ * $Log: dispnet.c,v $
+ * Revision 1.1  1995/11/12  23:37:48  stephene
+ * Initial revision
+ *
  */
 
