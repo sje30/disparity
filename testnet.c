@@ -9,13 +9,13 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.8 $
-*** $Date: 1995/12/08 00:18:00 $
+*** $Revision: 1.9 $
+*** $Date: 1995/12/09 16:42:01 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.8 1995/12/08 00:18:00 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.9 1995/12/09 16:42:01 stephene Exp stephene $";
 #endif
 
 
@@ -36,6 +36,7 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.8 1
 #include "bp_check_deriv.h"
 
 /* - Defines - */
+#define dumpCorrn
 
 /* - Function Declarations - */
 extern int	yylex();
@@ -231,7 +232,7 @@ void setUpNetwork(char *paramFile)
   initWtsRnd();
   writeWts("wts0.wts");
 
-  printPreCellInfo();
+/*   printPreCellInfo();  */
 
   createInputVectorsAndShifts();
 
@@ -586,6 +587,17 @@ char finishedFn(Real *wts, int iteration)
   char rval;
   Real corrn;
 
+  /* added Sat Dec  9 1995
+   * dump out correlations into a file called corrn.dat.
+   * This is slightly naughty, as it never closes this file,
+   * just keeps flushing it out...
+   */
+  
+
+#ifdef dumpCorrn
+  static FILE *corrnfp = NULL;
+#endif
+
   /* Print out the correlation for the fun of it, although at the
    * moment it is not being used to decide whether to stop running the
    * program.
@@ -593,6 +605,22 @@ char finishedFn(Real *wts, int iteration)
 
   corrn = Rvec_correlate(z.data, shifts.data, 0, numInputVectors );
   printf("Correlation %lf\n", corrn);
+
+#ifdef dumpCorrn
+  if (corrnfp == NULL ) {
+    /* open up corrn file */
+    corrnfp = fopen( "corrn.dat", "w");
+    if (! corrnfp ) {
+      printf("%s: %s could not be opened for writing",
+	     __FUNCTION__, "corrn.dat");
+      exit(-1);
+    }
+  }
+
+  fprintf(corrnfp, "%lf\n", corrn);
+  fflush(corrnfp);
+    
+#endif
     
   /* maxiterations is a global parameter. */
   
@@ -653,7 +681,9 @@ void setParamDefaults()
 
   inputWid = 5;
   inputHt = 1;
-  inputSkip = 2;
+  inputSkipX = 2;
+  inputSkipY = 0;
+  
   numInputVectors = 1000;
 
   cgmax = 1;			/* By default, we will maximise function. */
@@ -689,7 +719,8 @@ void printParams()
   printf("shiftsFile = %s\n", shiftsFile);
 
   printf("numInputVectors = %d\n", numInputVectors);
-  printf("inputSkip = %d\n", inputSkip);
+  printf("inputSkipX = %d\n", inputSkipX);
+  printf("inputSkipY = %d\n", inputSkipY); 
   printf("inputHt = %d\n", inputHt);
   printf("inputWid = %d\n", inputWid);
 
@@ -715,6 +746,9 @@ void copyVec(Real *wdest, Real *wsrc, int numWeights)
 /*************************** Version Log ****************************/
 /*
  * $Log: testnet.c,v $
+ * Revision 1.9  1995/12/09  16:42:01  stephene
+ * *** empty log message ***
+ *
  * Revision 1.8  1995/12/08  00:18:00  stephene
  * Inclusion of Rvec_correlate
  *
