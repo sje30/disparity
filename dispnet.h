@@ -9,8 +9,8 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.2 $
-*** $Date: 1995/11/10 15:29:10 $
+*** $Revision: 1.3 $
+*** $Date: 1995/11/12 23:06:27 $
 ****************************************************************************/
 
 
@@ -32,6 +32,7 @@ typedef  enum {Linearfn, Tanhfn} ActFn;
 typedef struct {
   int  numInputs;
   int *inputs;
+  Real **ptrInputs;
   Real *wtsStart;
 } cellInfo_t;
 
@@ -39,12 +40,49 @@ typedef struct {
  *		many inputs there are.  inputs[i] stores the location
  *		of the input cell in the activations array that is
  *		part of the input to this cell.
+ *		ptrInputs stores the pointer to the input cell.
+ *		i.e. ptrInput[i] = & (actInfo.actn[ inputs[i] ]);
  */
 
+/* There is one cellInfo structure for each cell in the op layer, but
+   there is no need to have cellInfo structure for the bias units, as
+   these cells do not receive any input. */
+
+
+
+/*** Presynaptic cell information ***/
+
+typedef struct {
+  int nOutputs;			/* number of connections that this
+ 				   presynaptic cell makes. Initially
+ 				   will be zero, and then incremented */
+  Real **wts;			/* wts[i] stores a pointer to the ith
+ 				   fan out weight from this cell*/
+  int *outputs;			/* output[i] stores the number of the
+ 				   postsynaptic cell that this weight
+ 				   is connected to. */
+				/* IS THIS Absolute or relative? */
+
+  Real **ptroutputs;		/* ptrouputs[i] is a pointer to the
+  				   activation of the ith postsynaptic
+  				   cell */
+} preCellInfo_t;
+
+ 
+typedef struct {
+  int tlx;	int tly;	/* Top Left */
+  int brx;	int bry;	/* Bottom Right */
+} Rect;
+
+   
 /* layerInfo_t	Information for a layer. */
 
 typedef struct {
-  int       	ncells;		/* this equals nrows * ncols */
+  int       	ncells;		/* this equals nrows * ncols. It
+				 * therefore does not include any Bias
+				 * weight, which will need to be
+				 * explicitly checked for.*/
+				   
   int       	nrows;		/* same as the ht */
   int       	ncols;		/* same as the wid */
   cellInfo_t 	*cellInfo;	/* cellInfo[i] stores the input
@@ -53,7 +91,16 @@ typedef struct {
   ActFn     	actfn;		/* Which activation function cells in this
 				   layer use. */
   BiasType	 bias;		/* Does this layer provide bias for
-				   the next layer?*/ 
+				   the next layer? */
+  preCellInfo_t	*preCellInfo;	/* preCellInfo[i] stores the
+  				   presynaptic info for cell i of this
+  				   layer */
+  int		nPreCellInfo;	/* number of elements in the
+  				 * preCellInfo array. This value can
+  				 * either be ncells or ncells+1,
+  				 * depending on whether there is a
+  				 * bias cell in this layer or not. */
+  
 } layerInfo_t;
 
 
@@ -91,12 +138,8 @@ typedef struct {
  *
  * size			size of the activation array, ie. actn[0 to size-1].
  * */
-    
- 
-typedef struct {
-  int tlx;	int tly;	/* Top Left */
-  int brx;	int bry;	/* Bottom Right */
-} Rect;
+
+
 
 
 
@@ -125,12 +168,14 @@ layerInfo_t	*layerInfo;
 
 
 
-
 #endif
 
 
 /*************************** Version Log ****************************/
 /* $Log: dispnet.h,v $
+ * Revision 1.3  1995/11/12  23:06:27  stephene
+ * Daily change
+ *
  * Revision 1.2  1995/11/10  15:29:10  stephene
  * Daily update - next major step is to present net with input and
  * calculate activations.
