@@ -9,8 +9,8 @@
 ***
 *** Created 10 Nov 95
 ***
-*** $Revision: 1.1 $
-*** $Date: 1995/11/10 21:59:00 $
+*** $Revision: 1.2 $
+*** $Date: 1995/11/21 23:33:01 $
 ****************************************************************************/
 
 
@@ -56,11 +56,23 @@ int inputHt; 			/* Height of each input vector from
 				   one image */
 int inputWid; 			/* Width of each input vector from one im. */
 
+int cgmax;			/* If non zero, then maximise merit
+				 * function in conjugate gradient
+				 * method. Default is 1.
+				 */
+int checker;			/* Do we use conjugate gradient or
+				 * just check the derivatives?  Non
+				 * zero means that we check.
+				 * Default: 1.
+				 */
 #endif
 
 
 /*************************** Version Log ****************************/
 /* $Log: dispvars.h,v $
+ * Revision 1.2  1995/11/21  23:33:01  stephene
+ * About to include CG Code
+ *
  * Revision 1.1  1995/11/10  21:59:00  stephene
  * Initial revision
  *

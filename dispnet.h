@@ -9,8 +9,8 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.6 $
-*** $Date: 1995/11/21 02:32:11 $
+*** $Revision: 1.7 $
+*** $Date: 1995/11/21 23:32:47 $
 ****************************************************************************/
 
 
@@ -160,6 +160,7 @@ typedef struct {
 
 typedef struct {
   int nLayers;
+  double f;			/* Value of the merit function */
 } netInfo_t;
 
 
@@ -256,6 +257,9 @@ layerInfo_t	*layerInfo;
 
 /*************************** Version Log ****************************/
 /* $Log: dispnet.h,v $
+ * Revision 1.7  1995/11/21  23:32:47  stephene
+ * About to include CG Code
+ *
  * Revision 1.6  1995/11/21  02:32:11  stephene
  * Update - moving towards a merit function
  *

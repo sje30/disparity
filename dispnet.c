@@ -9,13 +9,13 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.4 $
-*** $Date: 1995/11/21 02:32:37 $
+*** $Revision: 1.5 $
+*** $Date: 1995/11/21 23:32:38 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispnet.c,v 1.4 1995/11/21 02:32:37 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispnet.c,v 1.5 1995/11/21 23:32:38 stephene Exp stephene $";
 #endif
 
 /* Main code file for the Disparity net. */
@@ -620,7 +620,7 @@ void getZ()
   oplayer = netInfo.nLayers - 1;
   
   indexOpCell = actInfo.startLayer[oplayer];
-  printf("Op cell is found at location %d\n", indexOpCell);
+/*   printf("Op cell is found at location %d\n", indexOpCell); */
   
   for(vecnum=0; vecnum < numInputVectors; vecnum++) {
     z.data[vecnum] = allActns.allOps[vecnum][indexOpCell];
@@ -897,6 +897,9 @@ void testAddArrayInPlace()
 /*************************** Version Log ****************************/
 /*
  * $Log: dispnet.c,v $
+ * Revision 1.5  1995/11/21  23:32:38  stephene
+ * About to include CG Code
+ *
  * Revision 1.4  1995/11/21  02:32:37  stephene
  * Update - moving towards a merit function
  *

@@ -7,8 +7,8 @@
 ###
 ### Created 09 Nov 95
 ###
-### $Revision: 1.3 $
-### $Date: 1995/11/17 00:06:34 $
+### $Revision: 1.4 $
+### $Date: 1995/11/21 23:33:29 $
 #############################################################################
 CC = gcc
 
@@ -25,10 +25,11 @@ CFLAGS = -ansi -gstabs -g $(CHEADERS) $(CLIBDIRS)
 
 testnet : testnet.o readnet.o readnet.h dispscan.o dispinputs.o \
 	 dispnet.o dispwts.o dispmasks.o  convolve.o testconvolve.o \
-	disperrors.o 
-	$(LINK.c) -o testnet testnet.o readnet.o dispscan.o dispwts.o \
+	disperrors.o cg_williams_module.o bp_check_deriv.o
+	$(LINK.c) -o $(HOME)/bin/testnet \
+	testnet.o readnet.o dispscan.o dispwts.o \
 	dispinputs.o dispnet.o dispmasks.o convolve.o testconvolve.o \
-	disperrors.o \
+	disperrors.o cg_williams_module.o bp_check_deriv.o \
 	-lm -lmygen $(CHEADERS) $(CLIBDIRS)
 
 testsig: testsig.o
@@ -59,7 +60,7 @@ clean:
 # Use my version of tags.
 SRCTAGS = readnet.c readnet.h testnet.c dispnet.h dispnet.c dispwts.c \
 dispinputs.c dispinputs.h dispmasks.c dispglobals.h convolve.c \
-disperrors.c
+disperrors.c cg_williams_module.c bp_check_deriv.c
 
 TAGS:   $(SRCTAGS)
 	etags $(SRCTAGS)
@@ -70,6 +71,9 @@ tags.testconvolve: testconvolve.c convolve.c
 ############################ Version Log #############################
 #
 # $Log: makefile,v $
+# Revision 1.4  1995/11/21  23:33:29  stephene
+# About to include CG Code
+#
 # Revision 1.3  1995/11/17  00:06:34  stephene
 # # Daily update
 #

@@ -8,13 +8,13 @@
 ***
 *** Created 21 Nov 95
 ***
-*** $Revision$
-*** $Date$
+*** $Revision: 1.1 $
+*** $Date: 1995/11/21 23:30:07 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header$";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/disperrors.c,v 1.1 1995/11/21 23:30:07 stephene Exp stephene $";
 #endif
 
 
@@ -52,8 +52,8 @@ void storeTopLayerErrors(Array da)
   
   opCell = actInfo.startLayer[opLayer];
 
-  printf("%s: output is layer %d, op cell is index %d\n",
-	 __FUNCTION__, opLayer, opCell);
+/*   printf("%s: output is layer %d, op cell is index %d\n", */
+/* 	 __FUNCTION__, opLayer, opCell); */
 
   numVecs = allActns.num;
 
@@ -91,7 +91,7 @@ void propagateErrors()
 	layer--) {
       /** Calculate the errors for layer number LAYER **/
 
-      printf("Input %d calc errors for layer %d\n", vec, layer);
+/*       printf("Input %d calc errors for layer %d\n", vec, layer); */
 
       calcErrors(layer, vec);
     }
@@ -126,7 +126,7 @@ void calcErrors( int layer, int vec)
   cellsInLayer = layerInfo[layer].nPreCellInfo;
   preCellInfo = layerInfo[layer].preCellInfo;
   
-  printf("There are %d cells in layer %d\n", cellsInLayer, layer);
+/*   printf("There are %d cells in layer %d\n", cellsInLayer, layer); */
 
   /* All outputs are relative to the start of the layer, so to get
      the absolute cell number, we need the offset. */
@@ -137,10 +137,10 @@ void calcErrors( int layer, int vec)
   for(unit=0; unit<cellsInLayer; unit++) {
     thiscell = unit + srcoffset;
     
-    printf("Calc error for cell %d\n", unit);
+/*     printf("Calc error for cell %d\n", unit); */
 
     numOutputs = preCellInfo[unit].nOutputs;
-    printf("Unit %d has %d outputs \n", unit, numOutputs);
+/*     printf("Unit %d has %d outputs \n", unit, numOutputs); */
     wts = preCellInfo[unit].wts;
     wtsIndex = preCellInfo[unit].wtsIndex;	
     outputs = preCellInfo[unit].outputs;
@@ -157,16 +157,21 @@ void calcErrors( int layer, int vec)
       error = errors[opcell];
       bitsum = error * wt;
       sum += bitsum;
+
+      /*
       printf("Weight index %d Val %lf * Error from output cell %d %lf\n",
 	     wtsIndex[conn], wt, opcell, error);
-      printf("Bitsum %lf Sum %lf\n", bitsum, sum);
+	     */
+/*       printf("Bitsum %lf Sum %lf\n", bitsum, sum); */
     }
 
     /* Pass through derivative function */
     actn = actns[thiscell];
     deriv = dtanh(actn);
+    /*
     printf("Activation of this cell is %lf - after deriv %lf\n",
 	   actn, deriv);
+	   */
 
     sum *= deriv;
     
@@ -232,28 +237,32 @@ void createPartials()
   for(vec=0; vec<numVecs; vec++) {
     outputs = allActns.allOps[vec];
     errors = allActns.errors[vec];
-    printf("Creating onedw for activations %d\n", vec);
+/*     printf("Creating onedw for activations %d\n", vec); */
 
     setArray(onedw, 0.0);
     for(weight=0; weight<numWeights; weight++) {
       preCell = weightInfo.preCell[weight];
       postCell = weightInfo.postCell[weight];
 
+      /*
       printf("weight %d connects cell %d to cell %d\n",
 	     weight, preCell, postCell);
+	     */
       onedw.data[weight] = outputs[preCell] * errors[postCell];
 
+      /*
       printf("output %lf * error %lf = %lf\n",
 	     outputs[preCell], errors[postCell],
 	     onedw.data[weight]);
+	     */
       
     }
 
     /* save this array */
-
+/*
     sprintf(string, "onedw.%d", vec);
     writeArray(onedw, string);
-
+*/
     /* add this result to the dw partials vector. */
     addArrayInPlace(dw, onedw);
   }
@@ -265,5 +274,8 @@ void createPartials()
   
 /*************************** Version Log ****************************/
 /*
- * $Log$
+ * $Log: disperrors.c,v $
+ * Revision 1.1  1995/11/21  23:30:07  stephene
+ * Initial revision
+ *
  */
