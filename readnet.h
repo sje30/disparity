@@ -9,8 +9,8 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.1 $
-*** $Date: 1995/11/09 20:48:50 $
+*** $Revision: 1.2 $
+*** $Date: 1995/11/10 22:04:41 $
 ****************************************************************************/
 
 
@@ -22,20 +22,22 @@
 
 
 
-void freeActivationsArray();
-void readNet(char *fname);
-int cellArea(int tlx, int tly, int brx, int bry);
-void createWeights(int len);
-void freeWeights();
-Real *nextFreeWeight();
-
-
+void	freeActivationsArray();
+void	readNet(char *fname);
+int	cellArea(int tlx, int tly, int brx, int bry);
+void 	freeCellInfo();
+void	freePreCellInfo();
+void	createPreCellInfo();
+void	printPreCellInfo();
 
 #endif
 
 
 /*************************** Version Log ****************************/
 /* $Log: readnet.h,v $
+ * Revision 1.2  1995/11/10  22:04:41  stephene
+ * about to make a snapshot
+ *
  * Revision 1.1  1995/11/09  20:48:50  stephene
  * Initial revision
  *

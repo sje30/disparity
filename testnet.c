@@ -1,6 +1,6 @@
 /****************************************************************************
 ***
-*** Time-stamp: <>
+*** Time-stamp: <12 Nov 95 23:06:40 stephene>
 ***
 *** testnet.c
 *** 
@@ -9,13 +9,13 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.1 $
-*** $Date: 1995/11/09 20:49:36 $
+*** $Revision: 1.2 $
+*** $Date: 1995/11/10 22:05:10 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.1 1995/11/09 20:49:36 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.2 1995/11/10 22:05:10 stephene Exp stephene $";
 #endif
 
 
@@ -25,6 +25,7 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.1 1
 #include "dispnet.h"
 #include "dispvars.h"
 #include "readnet.h"
+#include "dispwts.h"
 #include <stdio.h>
 
 /* - Defines - */
@@ -60,6 +61,13 @@ main(int argc, char *argv[])
   printParams();
 
   readNet(netFile);
+/*   calcAllActivations(); */
+
+  initWtsRnd();
+  writeWts("wts0.wts");
+  iteration();
+  printPreCellInfo();
+  clearUpMemory();
 } /* end of main() */
 
 
@@ -82,6 +90,9 @@ void printParams()
 /*************************** Version Log ****************************/
 /*
  * $Log: testnet.c,v $
+ * Revision 1.2  1995/11/10  22:05:10  stephene
+ * about to make a snapshot
+ *
  * Revision 1.1  1995/11/09  20:49:36  stephene
  * Initial revision
  *
