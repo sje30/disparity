@@ -9,13 +9,13 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.12 $
-*** $Date: 1996/01/15 21:33:53 $
+*** $Revision: 1.13 $
+*** $Date: 1996/01/16 01:27:45 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.12 1996/01/15 21:33:53 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsunx/home/stephene/disparity/testnet.c,v 1.13 1996/01/16 01:27:45 stephene Exp stephene $";
 #endif
 
 
@@ -23,6 +23,7 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.12 
 
 /* -  Include Files - */
 #include <stdio.h>
+#include <string.h>
 #include <math.h>
 #include "dispnet.h"
 #include "dispvars.h"
@@ -65,6 +66,7 @@ main(int argc, char *argv[])
      testInputVectors();
      */
   
+  exit(0);			/* Return 0 if everything is ok */
 } /* end of main() */
 
 normalmain(int argc, char *argv[])
@@ -231,7 +233,14 @@ void setUpNetwork(char *paramFile)
 
   readNet(netFile);
 
-
+  printf("set the random seed...\n");
+  if (seed) {
+    seedrnd(seed);
+  } else {
+    /* use system clock */
+    seedrndtime();
+  }
+  
   initWtsRnd();
   writeWts("wts0.wts");
 
@@ -330,7 +339,7 @@ netmain(int argc, char *argv[])
   if ( !doLearning) {
     checkNetPerformance();
     
-    exit(-1);
+    exit(0);
   }
 
   /* Ok, we must want to do learning... */
@@ -494,7 +503,7 @@ void calcMeritAndPartials()
   v1 = 1.0 / v;
   u1 = 1.0 / u;
 
-  printf("1/u %lf 1/v %lf \n", u1, v1);
+  /*printf("1/u %lf 1/v %lf \n", u1, v1);*/
 
   multArrayInPlace( dudx, u1);
   multArrayInPlace( dvdx, v1);
@@ -835,6 +844,9 @@ void setParamDefaults()
   oneImage = 0;
   compcorrn = 1;
   usegnuplot = 0;
+  seed=0;
+  normInput=0;
+  noshifting=0;
 }
 
 void printParams()
@@ -875,7 +887,9 @@ void printParams()
   printf("doLearning = %d\n", doLearning);
   printf("oneImage = %d\n", oneImage);
   printf("compcorrn = %d\n", compcorrn);
-  printf("usegnuplot = %d\n", usegnuplot); 
+  printf("usegnuplot = %d\n", usegnuplot);
+  printf("normInput = %d\n", normInput);
+  printf("noshifting = %d\n", noshifting);
 }
 
 
@@ -903,9 +917,10 @@ void checkNetPerformance()
   /*** Local Variables ***/
   int vecnum;
   double corrn;
+  FILE	*corrnfp;
+  char corrnfile[255];
   
   printf("Just checking the network's performance\n");
-  
   printf("reading in wts from file %s\n", initWts);
   readWts(initWts);
   
@@ -939,10 +954,21 @@ void checkNetPerformance()
    */
   
   writeArray(z, results);
-
+  
   /* Get the correlation */
   corrn = Rvec_correlate(z.data, shifts.data, 0, numInputVectors );
   printf("Correlation %lf\n", corrn);
+
+  strcpy(corrnfile, "corrn.gen");
+  corrnfp = fopen( corrnfile, "w");
+  if (! corrnfp ) {
+    printf("%s: %s could not be opened for writing",
+	   __FUNCTION__, corrnfile);
+    exit(-1);
+  }
+  fprintf(corrnfp,"Correlation %lf\n", corrn);
+  fclose(corrnfp);
+  
 
 
   
@@ -952,6 +978,10 @@ void checkNetPerformance()
 /*************************** Version Log ****************************/
 /*
  * $Log: testnet.c,v $
+ * Revision 1.13  1996/01/16  01:27:45  stephene
+ * now have the code in place so that weight sharing can be done or left
+ * out.
+ *
  * Revision 1.12  1996/01/15  21:33:53  stephene
  * huh?
  *
