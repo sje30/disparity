@@ -9,13 +9,13 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.5 $
-*** $Date: 1995/11/21 23:32:38 $
+*** $Revision: 1.6 $
+*** $Date: 1995/11/23 16:19:42 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispnet.c,v 1.5 1995/11/21 23:32:38 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispnet.c,v 1.6 1995/11/23 16:19:42 stephene Exp stephene $";
 #endif
 
 /* Main code file for the Disparity net. */
@@ -893,10 +893,86 @@ void testAddArrayInPlace()
   freeArray(a2);
 }
 
+int test_angle()
+{
+
+
+  double
+    Rvec_angle(double *v1,double *v2,int imin, int imax);
+
+  
+  Real x[] = {0.0, 1.0};
+  Real y[] = {1.0, 0.0};
+
+  Real r;
+
+  r = Rvec_angle(x,y, 0,1);
+  printf("Angle r = %lf\n", r);
+}
+ 
+
+int test_correlate()
+{
+  /* test the correlation function */
+
+  /* Have verified this result using maple. see the help
+   * ?linearcorrelation
+   */
+  Real x[] = {1.0, 2.0, 3.0};
+  Real y[] = {1.2, 2.8, 3.2};
+
+  Real r;
+
+  r = Rvec_correlate(x,y, 0,2);
+  printf("Correlation r = %lf\n", r);
+}
+  
+  
+Real 
+Rvec_correlate(Real *x, Real *y, int imin, int imax)
+{
+  /* *x and *y are indexed from imin to imax */
+  /* modified from NUM REC code */
+
+  /* SJE: Changed so that index does go from imin to imax, rather than
+   * from 1 to n. */
+        
+  int             j;
+  Real    yt,xt,t,df;
+  Real    syy=0.0,sxy=0.0,sxx=0.0,ay=0.0,ax=0.0;
+  Real            den;
+  int             n;
+  Real            prob, r, z;
+        
+  n = imax-imin+1;
+  
+  for (j=imin;j<=imax;j++) {
+    ax += x[j];
+    ay += y[j];
+  }
+  
+  ax /= n;
+  ay /= n;
+  for (j=imin;j<=imax;j++) {
+    xt=x[j]-ax;
+    yt=y[j]-ay;
+    sxx += xt*xt;
+    syy += yt*yt;
+    sxy += xt*yt;
+  }
+  den = sqrt(sxx*syy);
+  r =  sxy / den;
+  
+  return((Real)r);
+}
+
 
 /*************************** Version Log ****************************/
 /*
  * $Log: dispnet.c,v $
+ * Revision 1.6  1995/11/23  16:19:42  stephene
+ * CG now installed
+ *
  * Revision 1.5  1995/11/21  23:32:38  stephene
  * About to include CG Code
  *
