@@ -173,13 +173,12 @@ SEARCH DIRECTION */
 	if ( (iter %10 ) == 0) {
 	  sprintf(opstr, "z.%d", iter);
 	  writeArray(z, opstr);
-
+#ifdef SJE_WANT_ZBAR	    
 	  sprintf(opstr, "zbar.%d", iter);
 	  writeArray(zbar, opstr);
-
-
 	  sprintf(opstr, "ztilde.%d", iter);
 	  writeArray(ztilde, opstr);
+#endif
 
 	  sprintf(opstr, "wts.%d", iter);
 	  writeWts(opstr);
@@ -401,8 +400,14 @@ int nl,nh;
 int
 Rvec_destroy(double *v,int nl,int nh)
 {
-
-free((char*) (v+nl),(unsigned int)(nh-nl+1)*sizeof(double));
+#ifdef SUSSEXCOMPILE
+  /* The free() command was orginally passed with two arguments when it 
+   * only wants one argument.
+   free((char*) (v+nl),(unsigned int)(nh-nl+1)*sizeof(double));
+   */
+#else
+free(v+nl);
+#endif
 }
 
 int
@@ -487,13 +492,13 @@ eval*/
 ***
 *** Created 23 Nov 95
 ***
-*** $Revision: 1.4 $
-*** $Date: 1995/12/08 15:10:31 $
+*** $Revision: 1.5 $
+*** $Date: 1995/12/11 06:25:15 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/cg_williams_module.c,v 1.4 1995/12/08 15:10:31 stephene Exp stephene $";
+static char *rcsid = "$Header: /home/stephen/disparity/cg_williams_module.c,v 1.5 1995/12/11 06:25:15 stephene Exp stephen $";
 #endif
 
 
@@ -501,6 +506,12 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/cg_williams_modul
 /*************************** Version Log ****************************/
 /*
  * $Log: cg_williams_module.c,v $
+ * Revision 1.5  1995/12/11 06:25:15  stephene
+ *  put in #ifdef SJE_SPATIAL, to make things slighlty easier to run this code
+ *  on other networks.
+ *
+ *  writing the weights out along with z, zbar and ztilde.
+ *
  * Revision 1.4  1995/12/08  15:10:31  stephene
  * simple change to the file
  *
