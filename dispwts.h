@@ -9,8 +9,8 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.3 $
-*** $Date: 1995/11/21 23:33:20 $
+*** $Revision: 1.4 $
+*** $Date: 1995/12/11 06:26:33 $
 ****************************************************************************/
 
 
@@ -24,11 +24,15 @@ void noMoreWeights();
 void initWtsRnd();
 void writeWts(char *fname);
 void readWts(char *fname);
+void printWtsInfo();
 #endif
 
 
 /*************************** Version Log ****************************/
 /* $Log: dispwts.h,v $
+ * Revision 1.4  1995/12/11  06:26:33  stephene
+ * new function readWts created
+ *
  * Revision 1.3  1995/11/21  23:33:20  stephene
  * About to include CG Code
  *
