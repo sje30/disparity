@@ -9,19 +9,20 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.3 $
-*** $Date: 1995/11/21 23:31:48 $
+*** $Revision: 1.4 $
+*** $Date: 1995/12/10 17:54:40 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispinputs.c,v 1.3 1995/11/21 23:31:48 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispinputs.c,v 1.4 1995/12/10 17:54:40 stephene Exp stephene $";
 #endif
 
 /* Functions to provide the input to the disparity network */
 
 /* -  Include Files - */
 #include <stdio.h>
+#include <math.h>
 #include "dispnet.h"
 #include "dispglobals.h"
 #include "dispvars.h"
@@ -80,19 +81,36 @@ void getNextInputVector(int vecnum)
   Real	*actn, *op;
   int	offset;
   Real	*ivdata;		/* Pointer to the inputvector data. */
+  ActFn	actfn;
   
+  /* get the activation function for cells in this layer */
+  actfn = layerInfo[INPUTLAYER].actfn;
+
   i = layerInfo[ INPUTLAYER ].ncells;
 
   ivdata = &(inputs.data[vecnum *inputs.wid]);
   
   offset = actInfo.startLayer[INPUTLAYER]; /* Should be zero. */ 
   actn = &(actInfo.actn[offset]);
+  
   op = &(actInfo.op[offset]);
+
+  if (actfn != Linearfn) {
+    printf("%s: Error - can only cope with linear input units at the moment - you will have to change this routine if you want to pass the input activation through an activation function\n", __FUNCTION__);
+    exit(-1);
+  }
+    
+  /* Fri Dec 15 1995
+   * check what the activation function is for these units: */
 
   for(; i-->0; ) {
     *actn = *ivdata;
-    *op = *actn;		/* Assuming identity function here for the
-				 * input cells*/
+    *op = *actn;		/* Assuming identity function here for
+				 * the input cells - change here if
+				 * you want to code for other
+				 * activation functions.  eg *op =
+				 * tanh(*actn). See calcErrors() for
+				 * an example of how to do this.*/
     actn++;
     op++;
     ivdata++;
@@ -108,15 +126,44 @@ void setBiases()
    * array to 1.0 .  */
   int layer;
   int lastInputLayer;
+  ActFn			actfn;
+
+  /* modifying 15/12/95 to check for activation function. */
   
   lastInputLayer = netInfo.nLayers-1;
   for(layer=0; layer <lastInputLayer; layer++) {
     if ( layerInfo[layer].bias == Bias) {
       /* Set the activation level */
 
-      /* This will need checking  */
+
       actInfo.actn[actInfo.biasIndex[layer] ] = 1.0;
-      actInfo.op[actInfo.biasIndex[layer] ] = 1.0;
+      /* The output of the cell should be the activation passed
+       * through the activation function. */
+      actfn = layerInfo[layer].actfn;
+
+      /*
+	 printf("Layer %d cells uses %s activation functions\n", layer,
+	 (actfn == Linearfn? "LINEAR" : "TANH" ));
+	 */
+      
+      switch(actfn) {
+	
+      case Linearfn:
+	/* linear unit. */
+	actInfo.op[actInfo.biasIndex[layer] ] = 1.0;
+	break;
+      case Tanhfn:
+	actInfo.op[actInfo.biasIndex[layer] ] = tanh(1.0);
+	break;
+      default:
+	printf("%s: Error - unknown activation function \n", __FUNCTION__);
+	break;
+
+      }
+      /*	 
+      printf("OP of bias cell in layer %d = %lf\n", layer, 	actInfo.op[actInfo.biasIndex[layer] ]); 
+      */
+
     }
   }
 }
@@ -373,6 +420,10 @@ void readInputFile(char *inputFile, Array arr)
 /*************************** Version Log ****************************/
 /*
  * $Log: dispinputs.c,v $
+ * Revision 1.4  1995/12/10  17:54:40  stephene
+ * Changed the method in which inputs are read in to the network, so that
+ * more than one row can be read from an input image.
+ *
  * Revision 1.3  1995/11/21  23:31:48  stephene
  * About to include CG Code
  *
