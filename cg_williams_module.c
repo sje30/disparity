@@ -45,9 +45,6 @@
  *
  */
 
-
-/* simple addition */
-
 #include <math.h>
 #include <stdio.h>
 #include "cg_williams_module.h"
@@ -62,10 +59,18 @@
 #define VERBOSE_TRAINING TRUE /* sje mod to TRUE */
 
 
+#define SJE_SPATIAL		/* If this is defined, then some extra
+				 * code will be included so that files
+				 * can be written out every few
+				 * epochs. */
+#ifdef SJE_SPATIAL
+
 extern FILE *opfp;
 #include "dispnet.h"
 
 extern Array z, zbar, ztilde;
+
+#endif /* SJE_SPATIAL */
 
 int
 cg_williams(w_orig, imin, imax, func, dfunc, finished)
@@ -118,8 +123,10 @@ SEARCH DIRECTION */
     int                     counter=0, fin=FALSE;
     int                 reset_search_dir=FALSE;
 
+#ifdef SJE_SPATIAL    
     char		opstr[80];
-
+#endif
+    
     len = imax-imin+1;
     Smax = len;
 
@@ -152,8 +159,14 @@ SEARCH DIRECTION */
         NEWLINE;
         printf("Line search number = %d E=%.6lf\n",iter,E0); /* sje mod*/
 
+
+#ifdef SJE_SPATIAL
+
+	/* Write out some files to see how conj grad is
+	 * getting on. */
+	
 	if (opfp != NULL) {
-	  fprintf(opfp, "Line search number = %d E=%.6lf\n",iter,E0);
+	  fprintf(opfp, "%d %.6lf\n",iter,E0);
 	  fflush(opfp);
 	}
 
@@ -168,7 +181,10 @@ SEARCH DIRECTION */
 	  sprintf(opstr, "ztilde.%d", iter);
 	  writeArray(ztilde, opstr);
 
+	  sprintf(opstr, "wts.%d", iter);
+	  writeWts(opstr);
 	}
+#endif
 	
 	iter ++;
 
@@ -197,9 +213,17 @@ SEARCH DIRECTION */
             /* FIND DERIV WRT TO NEW WT */
             APPLY_FUNCTION2(dfunc,w_try,g_try);
 
+	    /* This next line has an extra call to the evaluation
+	     * function, which may be doing a lot of work for big
+	     * networks, and so this has been commented out for the
+	     * moment.
+	     */
+
+#ifdef NOT_BIG_PROGRAM	    
             if (VERBOSE_TRAINING)
                     printf("Value of func after stepping sigma=%e in search dir = %le\n",
                     sigma,APPLY_FUNCTION1(func,w_try));
+#endif
 
             /* ESTIMATE MAG OF 2ND DERIV */
             cg_gamma = find_2nd_deriv(g0,g_try,s,sigma,imin, imax);
@@ -463,13 +487,13 @@ eval*/
 ***
 *** Created 23 Nov 95
 ***
-*** $Revision: 1.3 $
-*** $Date: 1995/12/08 00:17:07 $
+*** $Revision: 1.4 $
+*** $Date: 1995/12/08 15:10:31 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/cg_williams_module.c,v 1.3 1995/12/08 00:17:07 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/cg_williams_module.c,v 1.4 1995/12/08 15:10:31 stephene Exp stephene $";
 #endif
 
 
@@ -477,6 +501,9 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/cg_williams_modul
 /*************************** Version Log ****************************/
 /*
  * $Log: cg_williams_module.c,v $
+ * Revision 1.4  1995/12/08  15:10:31  stephene
+ * simple change to the file
+ *
  * Revision 1.3  1995/12/08  00:17:07  stephene
  * Found bugs in header file for definitions of JMAX and FALSE
  *
