@@ -9,13 +9,13 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision$
-*** $Date$
+*** $Revision: 1.1 $
+*** $Date: 1995/11/12 23:06:13 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header$";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispwts.c,v 1.1 1995/11/12 23:06:13 stephene Exp stephene $";
 #endif
 
 /* Functions to create and manipulate weights for disparity program */
@@ -91,19 +91,54 @@ void noMoreWeights()
 }
   
 
-void initWtsRnd()
+void initWtsRnd1()
 {
   /* Initialise weights to random values */
   int i;
   Real *data;
+  double r;
   data = weightInfo.data;
   i = weightInfo.numWts;
   for(;i-- > 0; ) {
-    *data = drnd();
+    *data = 0.3 * drnd();
+    /* Choose at random to make the weight negative. */
+    r = drnd();
+    if (r>0.5) {
+      *data *= -1.0;
+    }
     data++;
   }
 }
 
+
+void initWtsRnd()
+     /* Code for initialising weights from Jim. */
+{
+  /* according to PW's neural comp paper  2/95 */
+  int		num_wts, i;
+  Real	*wts;
+  Real	r,  A;
+
+  /* What does this give the weights - zero mean, and a certain variance? */
+
+  wts = weightInfo.data;
+  num_wts = weightInfo.numWts;
+	
+  A = 1.0 / sqrt((double)(2.0*num_wts));
+  /* numerator = 1 for input wts, and 1.6 for op wts  */ 	
+	
+  for (i=0;i<num_wts;i++)
+    {
+      /* r = 0 --> 1 */
+      r = drnd();
+      
+      wts[i] = A * log(r);
+      
+      r = drnd();
+      if (r<=0.5)  r=1; else  r=(-1);
+      wts[i] *= r;
+    }
+}
 
 
 void writeWts(char *fname)
@@ -132,6 +167,9 @@ void writeWts(char *fname)
 
 /*************************** Version Log ****************************/
 /*
- * $Log$
+ * $Log: dispwts.c,v $
+ * Revision 1.1  1995/11/12  23:06:13  stephene
+ * Initial revision
+ *
  */
 
