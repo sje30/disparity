@@ -9,13 +9,13 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.6 $
-*** $Date: 1996/01/15 12:50:58 $
+*** $Revision: 1.7 $
+*** $Date: 1996/01/16 01:27:37 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispinputs.c,v 1.6 1996/01/15 12:50:58 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsunx/home/stephene/disparity/dispinputs.c,v 1.7 1996/01/16 01:27:37 stephene Exp stephene $";
 #endif
 
 /* Functions to provide the input to the disparity network */
@@ -33,9 +33,14 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispinputs.c,v 1.
 #define INPUTLAYER 0		/* Layer number of the input layer. */
 #define NUMEYES 2		/* Two images, left and right. */
 
+
+#define RAD_TO_DEG 57.29577951
+#define NoOrientation -100 /* This is used to indicate that a region does
+			    * not have a valid orientation. */
 /* - Function Declarations - */
-
-
+extern int Globify(char *fname);
+Real getOrientation(Array source);
+Real sqr(Real x);
 /* - Global Variables - */ 
 
 
@@ -368,6 +373,10 @@ void createInputVectorsAndShiftsOneImage()
   int inputVectorSize;
   Real *shiftsData, *inputsdata, *data;
 
+  /* Orientation stuff */
+  char *ornfile = "realorientation.dat";
+  FILE	*orfp;
+  Real orientation;
 
   inputVectorSize=  1 * inputWid*inputHt; /* Here we only have one eye */
   createArray( inputWid, inputHt, &leftVector);
@@ -403,12 +412,23 @@ void createInputVectorsAndShiftsOneImage()
   printf("%s: Centre of input vector: row %d col %d\n", inputCentreRow,
 	 inputCentreCol);
 #endif
+
+
+
+  orfp = fopen( ornfile, "w");
+  if (! orfp ) {
+    printf("%s: %s could not be opened for writing",
+	   __FUNCTION__, ornfile);
+    exit(-1);
+  }
+
   
   /* Extract the input vectors */
   for(vec=0; vec< numInputVectors; vec++) {
     
     extractInputVector(leftImage, leftVector, colstart, rowstart);
-    
+    orientation = getOrientation(leftVector);
+    fprintf(orfp, "%f\n", orientation);
     /* Get the relevant shift, by taking the shift value that is
      * at the centre of the inputVector.
      */
@@ -458,7 +478,9 @@ void createInputVectorsAndShiftsOneImage()
   cfree(leftVector.data);
   cfree(leftImage.data); 
   cfree(shiftsArr.data);
-  
+
+
+  fclose(orfp);
 }
 
 
@@ -493,6 +515,138 @@ void extractInputVector(Array source, Array dest,
 
 
 
+Real getOrientation(Array source)
+{
+  /* Fill in the DEST array with elements from the SOURCE array,
+   * with the top left hand corner of the DEST array aligned
+   * to position (colstart, rowstart) in the SOURCE array. */
+
+  /*** Local Variables ***/
+  int x,y;
+  int sourcewid, sourceht;
+  Real *sourcedata;
+  Real *sourceindex;
+
+  
+
+  int		i;
+  int		numPoints;
+
+  Real		sum00 = 0.0,	/* sumij = x^i, y^j moment. */
+  		sum01 = 0.0,
+  		sum10 = 0.0,
+  		sum11 = 0.0,
+  		sum20 = 0.0,
+  		sum02 = 0.0;
+  Real	xBar, yBar;
+  Real	numerator, denominator, orientation;
+  Real	xd,yd;
+  Real	a,b,c, eMin, eMax, sq1, sinTerm, cosTerm, roundness;
+
+
+  sourcewid = source.wid; sourceht = source.ht; sourcedata = source.data;
+  numPoints = sourcewid * sourceht;
+  
+  for (y=0; y < sourceht; y++) {
+    for (x=0; x < sourcewid; x++) {
+
+      if ( *sourcedata++) {
+	
+	sum00 += 1;  	/* *B(x,y) */
+	sum01 += (1*y);  	/* *B(x,y) */
+	sum10 += (1*x);  	/* *B(x,y) */
+      }
+    }
+  }
+
+  xBar = ( sum10 / sum00);
+  yBar = ( sum01 / sum00);
+
+  /* Now pass over data again to calculate the 2nd order moments, since we
+   * now know the Centre of Gravity of the region. */
+
+  sourcedata = source.data;
+
+  for (y=0; y < sourceht; y++) {
+    for (x=0; x < sourcewid; x++) {
+
+      if ( *sourcedata++) {
+	
+	xd = x-xBar;
+	yd = y-yBar;
+	sum20 += (sqr(xd));  	/* *B(x,y) */
+	sum11 += (xd)*(yd);  /* *B(x,y) */
+	sum02 += (sqr(yd));  	/* *B(x,y) */
+      }
+    }
+  }
+  
+
+  numerator = 2.0 * sum11;
+  denominator = sum20 - sum02;
+
+
+  /* If the numerator and denominator are both zero, then we have a region
+   * with no meaningful orientation.  Such objects are circles and squares. */
+
+  if ( (numerator == 0 ) && ( denominator == 0 )) {
+    /* no orientation . */
+    orientation = NoOrientation;
+    roundness = 1;
+  }
+  else {
+    /* orientation is valid. */
+    orientation = (atan2(numerator, denominator)/ 2.0);
+
+    /* orientation angle is 2*theta, so we need to divide by 2. */
+
+    /* convert orientation from radians to degrees. */
+    orientation *= RAD_TO_DEG;
+
+
+    a = sum20;
+    b = 2.0 * sum11;
+    c = sum02;
+
+    sq1 = sqrt( sqr(b) + sqr(a-c));
+    sinTerm = b/sq1;
+    cosTerm = (a-c)/sq1;
+    
+    eMin = (0.5*(a+c)) - (0.5*(a-c)*cosTerm) - (0.5*b*sinTerm);
+    eMax = (0.5*(a+c)) + (0.5*(a-c)*cosTerm) + (0.5*b*sinTerm);
+    
+    roundness = eMin / eMax;
+  }
+
+
+
+#ifdef printMoments
+  if (logFP) {
+    fprintf(logFP, "Moments\ns00\t%lf\ns01\t%lf\ns10\t%lf\n",
+	    sum00, sum01, sum10);
+    fprintf(logFP, "Moments\ns20\t%lf\ns11\t%lf\ns02\t%lf\n",
+	    sum20, sum11, sum02);
+  }
+#endif
+
+#ifdef printMoments
+  if (logFP)
+    fprintf(logFP, "a = %lf b= %lf c = %lf sq1 = %lf\nsinTerm = %lf cosTerm = %lf \neMin = %lf eMax = %lf roundness = %lf\n",
+	    a, b, c, sq1, sinTerm, cosTerm, eMin, eMax, roundness);
+#endif
+
+  /*
+  stats.xBar = (int)xBar;
+  stats.yBar = (int)yBar;
+  stats.orientation = orientation;
+  stats.roundness = roundness;
+  */
+  return orientation;
+  
+}
+
+
+
 void readInputFile(char *inputFile, Array arr)
 {
 
@@ -509,12 +663,19 @@ void readInputFile(char *inputFile, Array arr)
   int	wid, ht, size;
   Real	*data;
   Real	val;
-  
+  char	globnm[255];
   wid = arr.wid;
   ht = arr.ht;
   data = arr.data;
   size = wid*ht;
 	
+  
+  if (inputFile[0] == '~') {
+    strcpy(globnm, inputFile);
+    Globify(globnm);
+    inputFile = globnm;
+    printf("%s: filename expanded to %s\n", __FUNCTION__, inputFile);
+  }
 
   fp = fopen( inputFile, "r");
   if (! fp ) {
@@ -534,9 +695,20 @@ void readInputFile(char *inputFile, Array arr)
   fclose(fp);
 }
 
+
+Real sqr(Real x)
+/* Post - Return the square of x. */
+{
+  return (x*x);
+}
+
 /*************************** Version Log ****************************/
 /*
  * $Log: dispinputs.c,v $
+ * Revision 1.7  1996/01/16  01:27:37  stephene
+ * now have the code in place so that weight sharing can be done or left
+ * out.
+ *
  * Revision 1.6  1996/01/15  12:50:58  stephene
  * just before snapshot for ali's extensions
  *
