@@ -8,13 +8,13 @@
 ***
 *** Created 21 Nov 95
 ***
-*** $Revision: 1.3 $
-*** $Date: 1995/12/07 15:42:34 $
+*** $Revision: 1.4 $
+*** $Date: 1995/12/11 06:25:31 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/disperrors.c,v 1.3 1995/12/07 15:42:34 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/disperrors.c,v 1.4 1995/12/11 06:25:31 stephene Exp stephene $";
 #endif
 
 
@@ -102,6 +102,7 @@ void calcErrors( int layer, int vec)
 {
   /* Calculate the errors using the VECth set of input and activations
    * for layer LAYER. */
+  
   /*** Local Variables ***/  
   int unit;
   preCellInfo_t		*preCellInfo;
@@ -116,6 +117,7 @@ void calcErrors( int layer, int vec)
   int 			conn, opcell, offset, srcoffset, thiscell;
   Real			wt, error;
   Real			*actns, actn, deriv;
+  ActFn			actfn;
   
   /* Work out how many cells there are in this layer.
    * For each cell in this layer:
@@ -125,11 +127,19 @@ void calcErrors( int layer, int vec)
 
   cellsInLayer = layerInfo[layer].nPreCellInfo;
   preCellInfo = layerInfo[layer].preCellInfo;
+
+  /* get the activation function for cells in this layer */
+  actfn = layerInfo[layer].actfn;
+
+  /*
+  printf("Layer %d cells uses %s activation functions\n", layer,
+	 (actfn == Linearfn? "LINEAR" : "TANH" ));
+	 */
   
 /*   printf("There are %d cells in layer %d\n", cellsInLayer, layer); */
 
   /* All outputs are relative to the start of the layer, so to get
-     the absolute cell number, we need the offset. */
+   * the absolute cell number, we need the offset. */
     
   srcoffset = actInfo.startLayer[layer]; /* Offset for this layer. */
   offset = actInfo.startLayer[layer+1];
@@ -137,10 +147,10 @@ void calcErrors( int layer, int vec)
   for(unit=0; unit<cellsInLayer; unit++) {
     thiscell = unit + srcoffset;
     
-/*     printf("Calc error for cell %d\n", unit); */
+    /*printf("Calc error for cell %d\n", unit); */
 
     numOutputs = preCellInfo[unit].nOutputs;
-/*     printf("Unit %d has %d outputs \n", unit, numOutputs); */
+    /*printf("Unit %d has %d outputs \n", unit, numOutputs); */
     wts = preCellInfo[unit].wts;
     wtsIndex = preCellInfo[unit].wtsIndex;	
     outputs = preCellInfo[unit].outputs;
@@ -172,7 +182,26 @@ void calcErrors( int layer, int vec)
      */
        
     actn = actns[thiscell];
-    deriv = dtanh(actn);
+
+    /* We need the derivative of the activation function: choose between
+     * the possible activation functions */
+    
+    switch(actfn) {
+      
+    case Linearfn:
+      /* linear unit. Derivative of f(x) = x, is f'(x) = 1.0 */
+      deriv = 1.0;
+      break;
+    case Tanhfn:
+      deriv = dtanh(actn);
+      break;
+    default:
+      printf("%s: Error - unknown activation function \n", __FUNCTION__);
+      break;
+
+    }
+    
+      
     /*
     printf("Activation of this cell is %lf - after deriv %lf\n",
 	   actn, deriv); */
@@ -283,6 +312,9 @@ void createPartials()
 /*************************** Version Log ****************************/
 /*
  * $Log: disperrors.c,v $
+ * Revision 1.4  1995/12/11  06:25:31  stephene
+ * *** empty log message ***
+ *
  * Revision 1.3  1995/12/07  15:42:34  stephene
  * post nips sort out
  *
