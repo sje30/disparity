@@ -9,13 +9,13 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.7 $
-*** $Date: 1996/01/16 01:27:37 $
+*** $Revision: 1.8 $
+*** $Date: 1997/06/13 19:33:33 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsunx/home/stephene/disparity/dispinputs.c,v 1.7 1996/01/16 01:27:37 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsunx/home/stephene/disparity/dispinputs.c,v 1.8 1997/06/13 19:33:33 stephene Exp stephene $";
 #endif
 
 /* Functions to provide the input to the disparity network */
@@ -39,7 +39,7 @@ static char *rcsid = "$Header: /rsunx/home/stephene/disparity/dispinputs.c,v 1.7
 			    * not have a valid orientation. */
 /* - Function Declarations - */
 extern int Globify(char *fname);
-Real getOrientation(Array source);
+Real getOrientation(Array source, FILE *fp);
 Real sqr(Real x);
 /* - Global Variables - */ 
 
@@ -371,7 +371,7 @@ void createInputVectorsAndShiftsOneImage()
   int inputCentreRow, inputCentreCol;
   int oneInputSize = inputWid * inputHt;    
   int inputVectorSize;
-  Real *shiftsData, *inputsdata, *data;
+  Real *shiftsData, *inputsdata, *data , sum, sumsq, k, m ;
 
   /* Orientation stuff */
   char *ornfile = "realorientation.dat";
@@ -427,8 +427,7 @@ void createInputVectorsAndShiftsOneImage()
   for(vec=0; vec< numInputVectors; vec++) {
     
     extractInputVector(leftImage, leftVector, colstart, rowstart);
-    orientation = getOrientation(leftVector);
-    fprintf(orfp, "%f\n", orientation);
+    orientation = getOrientation(leftVector,orfp);
     /* Get the relevant shift, by taking the shift value that is
      * at the centre of the inputVector.
      */
@@ -444,8 +443,26 @@ void createInputVectorsAndShiftsOneImage()
     data = leftVector.data;
 
     /* copy across the data from the image into the inputs. */
-    for(i=oneInputSize; i-->0;) {
-      *inputsdata++ = *data++;
+    if (normInput) {
+
+      /* normalise input data here */
+      sum=0.0 ; sumsq = 0.0 ;
+      for (i=0;i<oneInputSize;i++)
+	{ sum += data[i] ; sumsq += (data[i]*data[i]) ; } ;
+      m = sum/oneInputSize ;
+      k = 1.0/(sqrt(sumsq-(sum*sum/oneInputSize))+0.000000001) ;
+
+      /* copy across the data from the image into the inputs. */
+      for(i=oneInputSize; i-->0;) {
+	*inputsdata++ = k * (*data++ - m)  ;
+      }
+    }
+    else {
+      /* don't bother normalising input */
+      
+      for(i=oneInputSize; i-->0;) {
+	*inputsdata++ = *data++;
+      }
     }
     
   
@@ -515,7 +532,7 @@ void extractInputVector(Array source, Array dest,
 
 
 
-Real getOrientation(Array source)
+Real getOrientation(Array source, FILE *fp)
 {
   /* Fill in the DEST array with elements from the SOURCE array,
    * with the top left hand corner of the DEST array aligned
@@ -545,13 +562,13 @@ Real getOrientation(Array source)
 
 
   sourcewid = source.wid; sourceht = source.ht; sourcedata = source.data;
-  numPoints = sourcewid * sourceht;
+  numPoints = 0;
   
   for (y=0; y < sourceht; y++) {
     for (x=0; x < sourcewid; x++) {
 
       if ( *sourcedata++) {
-	
+	numPoints++;
 	sum00 += 1;  	/* *B(x,y) */
 	sum01 += (1*y);  	/* *B(x,y) */
 	sum10 += (1*x);  	/* *B(x,y) */
@@ -641,6 +658,9 @@ Real getOrientation(Array source)
   stats.orientation = orientation;
   stats.roundness = roundness;
   */
+
+  fprintf(fp, "%f %f %d\n", orientation, roundness, numPoints);
+
   return orientation;
   
 }
@@ -705,6 +725,9 @@ Real sqr(Real x)
 /*************************** Version Log ****************************/
 /*
  * $Log: dispinputs.c,v $
+ * Revision 1.8  1997/06/13  19:33:33  stephene
+ * added code for computing orientation of each input vector
+ *
  * Revision 1.7  1996/01/16  01:27:37  stephene
  * now have the code in place so that weight sharing can be done or left
  * out.
