@@ -7,22 +7,18 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.6 $
-*** $Date: 1995/11/17 00:07:09 $
+*** $Revision: 1.7 $
+*** $Date: 1995/11/21 23:33:39 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/readnet.c,v 1.6 1995/11/17 00:07:09 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/readnet.c,v 1.7 1995/11/21 23:33:39 stephene Exp stephene $";
 #endif
 
 
 /* Code to read the network structure from a file and create the
  * neccessary structures for the activations and weights */
-
-
-/* TO do: sort out connectivity for the "full" marker
- * look at the inclusion of bias weights */
 
 
 /* - Include Files - */
@@ -212,7 +208,8 @@ void readNet(char *fname)
       readNextLine();
       sscanf(line, "connections to layer %d", &destLayer);
       if ( destLayer != nextLayer) {
-	printf("Error: need connections for layer %d - given %d (line %d)\n",
+	printf("%s: Error: need connections for layer %d - given %d (line %d)\n",
+	       __FUNCTION__,
 	       nextLayer, destLayer, linenum);
 	exit(-1);
       }
@@ -909,6 +906,9 @@ void printNet()
 /*************************** Version Log ****************************/
 /*
  * $Log: readnet.c,v $
+ * Revision 1.7  1995/11/21  23:33:39  stephene
+ * About to include CG Code
+ *
  * Revision 1.6  1995/11/17  00:07:09  stephene
  * calcActivation: changed so that it looks in the .op array rather than
  * the actn array.

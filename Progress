@@ -80,4 +80,36 @@ Two bugs in CG code meant that things werent working:
 	    always decreasing, regardless of the value of pi.  This
 	    is now fixed.
 
+Sat Dec  9 1995
+---------------
+Snapshot sat9dec created.
+
+About to work on dispinputs.c so that it can read in 2d images as well
+as 1d images. Will be changing inputSkip to inputSkipX and creating an
+extra param inputSkipY with default value 0.  Older parameter files
+will need to be careful, as inputSkip will no longer be recognised.
+
+Corrn.dat file created to keep track of the correlations.
+
+sin 5 x 1000 period 500 and period 200 ok.
+
+
+What about the gauss?
+
+trying the network. a 200 x 200 output grid is too big for the net to
+run - we get memory allocation probs.
+
+gauss600.prm  - 20 x 20  (t1)
+
+gauss600a.prm - 60 x 60
+
+gauss600b.prm - 40 x 40
+
+gauss600c.prm - 100 x 100
+
+
+- to do: run on egg box 500 x 500 would be nice idea.
+ 
+
+
 
