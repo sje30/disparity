@@ -9,13 +9,13 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.6 $
-*** $Date: 1995/11/23 16:19:42 $
+*** $Revision: 1.7 $
+*** $Date: 1995/12/08 00:17:32 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispnet.c,v 1.6 1995/11/23 16:19:42 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispnet.c,v 1.7 1995/12/08 00:17:32 stephene Exp stephene $";
 #endif
 
 /* Main code file for the Disparity net. */
@@ -611,8 +611,11 @@ void storeActivations(int input)
 void getZ()
 {
   /* After all the inputs have been presented, get the Z array */
+  /* This function gets the output from the net for each input vector
+   * presented to the net, and stores it in the z array.
+   */
 
-  /*** Local Variables ***/  
+  /*** Local Variables ***/
   int vecnum;
   int indexOpCell;		/* Index to the output cell. */
   int oplayer;
@@ -970,6 +973,9 @@ Rvec_correlate(Real *x, Real *y, int imin, int imax)
 /*************************** Version Log ****************************/
 /*
  * $Log: dispnet.c,v $
+ * Revision 1.7  1995/12/08  00:17:32  stephene
+ * Including the correlation code from Jim (slightly amended)
+ *
  * Revision 1.6  1995/11/23  16:19:42  stephene
  * CG now installed
  *
