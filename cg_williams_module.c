@@ -39,6 +39,10 @@
  *
  * One of the calls to applyfunction2 was wrong. (Pointer not needed)
  *
+ * Fri Dec  8 1995
+ *
+ * Found bugs in header file for definitions of JMAX and FALSE
+ *
  */
 
 
@@ -104,7 +108,7 @@ char (*finished)();
     int                 len;
     int                 i, iter=0;
     int                 itemp;
-    int                 print_angles=FALSE;
+    int                 print_angles=TRUE;
     int                 print_profile=FALSE;  /* PRINT PROFILE OF CURRENT
 SEARCH DIRECTION */
     int                 contiguous_fails=0;
@@ -180,7 +184,9 @@ SEARCH DIRECTION */
 
             /* KAPPA IS LENGTH**2 OF SEARCH VECTOR , MAG OF GRAD */
             kappa = Rvec_dot(s,s,imin,imax);
-
+	    if (VERBOSE_TRAINING) {
+	      printf("Step1 : Kappa %e\n", kappa);
+	    }
             sigma = epsilon/sqrt((double)kappa);
 
             /* FIND WT VEC  USED TO EST 2ND DERIV BY STEPPING IN SEARCH DIR A BIT */
@@ -213,10 +219,21 @@ SEARCH DIRECTION */
         /* CALC STEP SIZE AND ADAPT EPSILON */
         alpha = -(mu/delta);
         temp = pow((double)(alpha/sigma),(double)pi);
+
+	/* Clip temp so that it must be in the range [0.1, 10.0] */
+	/* There was a bug in the definition of JMAX macro - it was the
+	 * same as the JMIN macro. */
+	
         temp = JMAX(0.1,temp);
         temp = JMIN(10,temp);
         epsilon = temp*epsilon;
 
+	/* Check on the values of alpha and epsilon. */
+	if( VERBOSE_TRAINING ) {
+	  printf("Alpha %lf\t Epsilon %e\n", alpha, epsilon);
+	  printf("mu %e\t delta %e\n", mu, delta);
+	}
+	
         /* STEP 5 */
         /* CALC COMPARISON RATIO */
         /* MAKE NEW WEIGHT VECTOR AT ESTIMATED MINIMUM */
@@ -444,13 +461,13 @@ eval*/
 ***
 *** Created 23 Nov 95
 ***
-*** $Revision: 1.1 $
-*** $Date: 1995/11/23 16:29:51 $
+*** $Revision: 1.2 $
+*** $Date: 1995/12/07 15:42:25 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/cg_williams_module.c,v 1.1 1995/11/23 16:29:51 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/cg_williams_module.c,v 1.2 1995/12/07 15:42:25 stephene Exp stephene $";
 #endif
 
 
@@ -458,6 +475,9 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/cg_williams_modul
 /*************************** Version Log ****************************/
 /*
  * $Log: cg_williams_module.c,v $
+ * Revision 1.2  1995/12/07  15:42:25  stephene
+ * post nips sort out
+ *
  * Revision 1.1  1995/11/23  16:29:51  stephene
  * Initial revision
  *
