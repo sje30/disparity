@@ -8,13 +8,13 @@
 ***
 *** Created 17 Nov 95
 ***
-*** $Revision: 1.1 $
-*** $Date: 1995/11/17 21:03:55 $
+*** $Revision: 1.2 $
+*** $Date: 1995/11/21 23:31:37 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/convolve.c,v 1.1 1995/11/17 21:03:55 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/convolve.c,v 1.2 1995/11/21 23:31:37 stephene Exp stephene $";
 #endif
 
 
@@ -146,9 +146,11 @@ void double_convolve2d_wrap(Real *input, int inputWid, int inputHt,
 	
 
 	for(mx=0; mx < maskwid; mx++) {
+	  /*
 	  printf( "mask %lf  * input %lf = %lf\n", *tmask,
 		 input[offset+startcol],
 		 (*tmask * input[startcol+offset]));
+		 */
 	  sum += (*tmask * input[offset+startcol]);
 	  tmask++;
 	  startcol++;
@@ -156,7 +158,7 @@ void double_convolve2d_wrap(Real *input, int inputWid, int inputHt,
 	    startcol = 0; /* should just wrap round nicely. */
 	  }
 	}
-	printf("\n");
+/* 	printf("\n"); */
 	/* move onto next row of input to mask */
 	startrow++;
 	if ( startrow == inputHt) {
@@ -229,6 +231,9 @@ void double_convolve1d_wrap(Real *input, int inputWid,
 /*************************** Version Log ****************************/
 /*
  * $Log: convolve.c,v $
+ * Revision 1.2  1995/11/21  23:31:37  stephene
+ * About to include CG Code
+ *
  * Revision 1.1  1995/11/17  21:03:55  stephene
  * Initial revision
  *
