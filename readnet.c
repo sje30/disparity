@@ -9,13 +9,13 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.2 $
-*** $Date: 1995/11/10 15:28:36 $
+*** $Revision: 1.3 $
+*** $Date: 1995/11/10 22:02:33 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/readnet.c,v 1.2 1995/11/10 15:28:36 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/readnet.c,v 1.3 1995/11/10 22:02:33 stephene Exp stephene $";
 #endif
 
 
@@ -31,7 +31,8 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/readnet.c,v 1.2 1
 #include <stdio.h>
 #include "dispnet.h"
 #include "readnet.h"
-
+#include "rnd.h"
+#include "dispwts.h"
 /* - Defines - */
 #define MAX_NUM_WEIGHTS 2000
 #define TWODTOONED(x,y,wid) ( (wid)*(y) + (x))
@@ -67,20 +68,20 @@ void readNet(char *fname)
 
   /*** Local Variables ***/
 
-  int      destLayer;
-  int      layer,cell;
-  CellInfo *cellInfo;
-  int      unitnum;
-  int      numunits;
-  int      tlx, tly, brx, bry;
-  Rect     rect;
-  int      readingConnections;
-  int      nextLayer;
-  char     afn[30], anybias[30];
-  int      i, returnval;
-  int      nLayers;
-  int      layernum, wid, ht;
-  int      ncols, nrows;
+  int      	destLayer;
+  int      	layer,cell;
+  cellInfo_t	*cellInfo;
+  int      	unitnum;
+  int      	numunits;
+  int      	tlx, tly, brx, bry;
+  Rect     	rect;
+  int      	readingConnections;
+  int      	nextLayer;
+  char     	afn[30], anybias[30];
+  int      	i, returnval;
+  int      	nLayers;
+  int      	layernum, wid, ht;
+  int      	ncols, nrows;
 
 
 
@@ -104,7 +105,7 @@ void readNet(char *fname)
 
   /* Allocate space for the layer data */
 
-  layerInfo = (LayerInfo*)calloc(nLayers, sizeof(LayerInfo));
+  layerInfo = (layerInfo_t*)calloc(nLayers, sizeof(layerInfo_t));
   if (! layerInfo) { 
     printf("%s: could not allocate space for layerInfo\n", __FUNCTION__);
     exit(-1);
@@ -147,11 +148,11 @@ void readNet(char *fname)
     /*** Convert the activation function string into a corresponding code ***/
     if (!strcmp(afn, "TANH") ) {
       printf("Tanh activation function for layer %d\n", nextLayer);
-      layerInfo[nextLayer].actfn = tanhfn;
+      layerInfo[nextLayer].actfn = Tanhfn;
     }
     else if ( !strcmp( afn, "LINEAR")) {
       printf("Linear activation function for layer %d\n", nextLayer);
-      layerInfo[nextLayer].actfn = linearfn;
+      layerInfo[nextLayer].actfn = Linearfn;
     }
     
     else {
@@ -164,11 +165,11 @@ void readNet(char *fname)
     /*** Decide whether we need bias or not. ***/
     if (!strcmp(anybias, "bias")) {
       printf("Bias needed for layer %d\n", nextLayer);
-      layerInfo[nextLayer].bias = bias;
+      layerInfo[nextLayer].bias = Bias;
     }
     else   if (!strcmp(anybias, "nobias")) {
       printf("No bias needed for layer %d\n", nextLayer);
-      layerInfo[nextLayer].bias = nobias;
+      layerInfo[nextLayer].bias = Nobias;
     }
     else {
       /* Invalid bias value */
@@ -216,7 +217,7 @@ void readNet(char *fname)
       /* Create space for the cellInfo structure */
       
       
-      cellInfo = (CellInfo*)calloc(numunits, sizeof(CellInfo));
+      cellInfo = (cellInfo_t*)calloc(numunits, sizeof(cellInfo_t));
       if (! cellInfo) { 
 	printf("%s: could not allocate space for cellInfo\n",
 	       __FUNCTION__);
@@ -304,7 +305,8 @@ void readNet(char *fname)
   /* End of reading in net - close up files  */
 
   /* Show how many weights have been allocated. */
-  printf("%d weights have been allocated\n", weightInfo.nextfreeweight);
+  noMoreWeights();
+  printf("%d weights have been allocated\n", weightInfo.nextFreeWeight);
   fclose(structFP);
 
 
@@ -315,8 +317,9 @@ void readNet(char *fname)
 
   printNet();
 
-  /* This must be moved elsewhere at the end of the day */
-  cfree(layerInfo);
+
+
+
 }
 
 
@@ -329,48 +332,6 @@ int cellArea(int tlx, int tly, int brx, int bry)
   ht  = (bry - tly) + 1;
   return (wid*ht);
 }
-
-/********************************************/
-/*** Functions for allocating the weights ***/
-/********************************************/
-
-void createWeights(int len)
-{
-  /* Create the weight vector of length len. Initialise other relevant
-   * structures */
-
-  Real	*data;
-
-  data = (Real*)calloc(len, sizeof(Real));
-  if (! data) { 
-    printf("%s: could not allocate space for data\n", __FUNCTION__);
-    exit(-1);
-  }
-
-  weightInfo.data = data;
-  weightInfo.nextfreeweight = 0;
-  weightInfo.maxindex = len-1;
-}
-
-
-void freeWeights()
-{
-  /* Clear up the weights structure */
-  cfree(weightInfo.data);
-  weightInfo.nextfreeweight = -999;
-  weightInfo.maxindex = -999;
-}
-  
-
-Real *nextFreeWeight()
-{
-  /* Allocate the next free weight */
-  Real *nextwt;
-  nextwt = &(weightInfo.data[weightInfo.nextfreeweight]);
-  weightInfo.nextfreeweight++;
-  return nextwt;
-}
-
 
 
 
@@ -410,7 +371,7 @@ int emptyLine(char *str)
     return 1;
   }
   while (looping) {
-    if ((*str == ' ') OR (*str == '\t')) {
+    if ((*str == ' ') || (*str == '\t')) {
       /* ok, just whitespace */
       str++;
       ;
@@ -432,6 +393,7 @@ void createActivationArray()
 {
   /* Create the activation array and set up the other data structures */
   /*** Local Variables ***/
+  Real	*actn;
   int cellnum;
   int	*biasIndex;
   int nLayers;
@@ -453,13 +415,14 @@ void createActivationArray()
     exit(-1);
   }
 
+  
   cellnum = 0;
   for(layer=0; layer < nLayers; layer++) {
     startLayer[layer] = cellnum;
     unitsInLayer = layerInfo[layer].ncells;
     cellnum += unitsInLayer;
 
-    if ( layerInfo[layer].bias == bias ) {
+    if ( layerInfo[layer].bias == Bias ) {
       /* We have a bias also to include */
       biasIndex[layer] = cellnum;
       cellnum++;
@@ -470,10 +433,21 @@ void createActivationArray()
 
   }
 
+  /* Now we should know how many cells are required in the activation array */
+  /* Create the actual activations array */
+ 
+  printf("Need to allocate %d cells for the actn array\n", cellnum);
+  actn = (Real*)calloc(cellnum, sizeof(Real));
+  if (! actn) { 
+    printf("%s: could not allocate space for actn\n", __FUNCTION__);
+    exit(-1);
+  }
+
+
   actInfo.size = cellnum;
   actInfo.startLayer = startLayer;
   actInfo.biasIndex = biasIndex;
-
+  actInfo.actn = actn;
 
 }
 
@@ -494,7 +468,10 @@ void showActivationsArray()
 void freeActivationsArray()
 {
   /* Free up all of the arrays allocated for the activation Information */
+  /* This should only be called at the end of the program when all of
+     the data structures are no longer needed. */
 
+  
   cfree(actInfo.actn); 
   cfree(actInfo.startLayer); 
   cfree(actInfo.biasIndex);
@@ -515,25 +492,25 @@ void checkRect(Rect rect, int linenumd, int layer)
   ncols = layerInfo[layer].ncols;
   nrows = layerInfo[layer].nrows;
 
-  if ( (tlx <0 ) OR (tlx >= ncols)) {
+  if ( (tlx <0 ) || (tlx >= ncols)) {
     printf("%s : Error line %d - tlx (%d) must be in range [%d,%d]\n",
 	   __FUNCTION__, linenum, tlx, 0, ncols-1);
     exit(-1);
 	  }
   
-  if ( (brx <0 ) OR (brx >= ncols)) {
+  if ( (brx <0 ) || (brx >= ncols)) {
     printf("%s : Error line %d - brx (%d) must be in range [%d,%d]\n",
 	   __FUNCTION__, linenum, brx, 0, ncols-1);
     exit(-1);
   }
   
-  if ( (tly <0 ) OR (tly >= nrows)) {
+  if ( (tly <0 ) || (tly >= nrows)) {
     printf("%s : Error line %d - tly (%d) must be in range [%d,%d]\n",
 	   __FUNCTION__, linenum, tly, 0, nrows-1);
     exit(-1);
   }
   
-  if ( (bry <0 ) OR (bry >= nrows)) {
+  if ( (bry <0 ) || (bry >= nrows)) {
     printf("%s : Error line %d - bry (%d) must be in range [%d,%d]\n",
 	   __FUNCTION__, linenum, bry, 0, nrows-1);
     exit(-1);
@@ -550,6 +527,7 @@ void connectCells(int sourceLayer, int unitnum, int destLayer, Rect rect)
    * into the destLayer. */
 
   /*** Local Variables ***/
+  Real **ptrInputs;
   int  inputcell;
   int  firstInput;
   int  numInputCells, inputnum;
@@ -559,7 +537,7 @@ void connectCells(int sourceLayer, int unitnum, int destLayer, Rect rect)
   int  ncols;
   int  needbias;
   int	inputOffset;
-  CellInfo *cellInfo;
+  cellInfo_t	*cellInfo;
 
 
   ncols = layerInfo[sourceLayer].ncols;
@@ -572,7 +550,7 @@ void connectCells(int sourceLayer, int unitnum, int destLayer, Rect rect)
   bry = rect.bry;
 
   /* Does this cell also need to receive bias input? */
-  if ( layerInfo[sourceLayer].bias == bias) {
+  if ( layerInfo[sourceLayer].bias == Bias) {
     needbias =1;
   } else {
     needbias = 0;
@@ -596,6 +574,13 @@ void connectCells(int sourceLayer, int unitnum, int destLayer, Rect rect)
   cellInfo[unitnum].numInputs = numInputCells;
   
 
+  ptrInputs = (Real **)calloc(numInputCells, sizeof(Real *));
+  if (! ptrInputs) { 
+    printf("%s: could not allocate space for ptrInputs\n", __FUNCTION__);
+    exit(-1);
+  }
+  cellInfo[unitnum].ptrInputs = ptrInputs;
+
   inputnum = 0;
   firstInput =1;
   for(y=tly; y<=bry; y++) {
@@ -609,6 +594,7 @@ void connectCells(int sourceLayer, int unitnum, int destLayer, Rect rect)
 	(void)nextFreeWeight();
       }
       cellinputs[inputnum] = (inputOffset + inputcell);
+      ptrInputs[inputnum] = &(actInfo.actn[inputOffset + inputcell]);
       inputnum++;
     }
   }
@@ -616,9 +602,10 @@ void connectCells(int sourceLayer, int unitnum, int destLayer, Rect rect)
   if (needbias) {
     /* Add the input from the bias cell */
     cellinputs[inputnum] = actInfo.biasIndex[sourceLayer];
+    ptrInputs[inputnum] = &(actInfo.actn[actInfo.biasIndex[sourceLayer]]);
     (void)nextFreeWeight();
   }
-
+  
 
 }
 
@@ -667,7 +654,7 @@ void printNet()
       }
       printf("\n");
     }
-    if (layerInfo[layer].bias == bias) {
+    if (layerInfo[layer].bias == Bias) {
       printf("Bias\n");
     }
   } /* next layer */
@@ -683,7 +670,7 @@ void printNet()
       }
       printf("\n");
     }
-    if (layerInfo[layer].bias == bias) {
+    if (layerInfo[layer].bias == Bias) {
       printf("Bias %d\n", activationcell++);
     }
   } /* next layer */
@@ -696,6 +683,9 @@ void printNet()
 /*************************** Version Log ****************************/
 /*
  * $Log: readnet.c,v $
+ * Revision 1.3  1995/11/10  22:02:33  stephene
+ * about to make a snapshot
+ *
  * Revision 1.2  1995/11/10  15:28:36  stephene
  * Daily update - next major step is to present net with input and
  * calculate activations.
