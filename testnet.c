@@ -9,13 +9,13 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.11 $
-*** $Date: 1995/12/11 06:27:37 $
+*** $Revision: 1.12 $
+*** $Date: 1996/01/15 21:33:53 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.11 1995/12/11 06:27:37 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.12 1996/01/15 21:33:53 stephene Exp stephene $";
 #endif
 
 
@@ -34,9 +34,10 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.11 
 #include "testnet.h"
 #include "cg_williams_module.h"
 #include "bp_check_deriv.h"
-
+#include "dispdefines.h"
 /* - Defines - */
 #define dumpCorrn
+
 
 /* - Function Declarations - */
 void createLayerOpFiles();
@@ -427,6 +428,7 @@ void calcMeritAndPartials()
     if (usegnuplot) {
       createLayerOpFiles();
       showGnuplot();
+
     }
 
     storeActivations(vecnum);
@@ -559,8 +561,11 @@ void createLayerOpFiles()
     /* print the state of cells in layer LAYER */
     ncells = layerInfo[layer].ncells;
     cellnum = actInfo.startLayer[layer];
-    printf("layer %d has %d cells, starting at location %d\n",
+    /*
+       printf("layer %d has %d cells, starting at location %d\n",
 	   layer, ncells,  cellnum);
+	   */
+    
     for(i=0; i< ncells; i++) {
       fprintf(opfp, "%f\n", actInfo.op[cellnum]);
       fprintf(actfp, "%f\n", actInfo.actn[cellnum]);
@@ -568,7 +573,7 @@ void createLayerOpFiles()
     }
     if (layerInfo[layer].bias == Bias ) {
       cellnum = actInfo.biasIndex[layer];
-      printf("bias cell at loc %d\n", cellnum);
+      /*printf("bias cell at loc %d\n", cellnum); */
       fprintf(opfp, "%f\n", actInfo.op[cellnum]);
       fprintf(actfp, "%f\n", actInfo.actn[cellnum]);
     }      
@@ -578,7 +583,7 @@ void createLayerOpFiles()
     fclose(opfp);
   } /* next layer */
     
-  exit(-1);
+
   
 }
 
@@ -947,6 +952,9 @@ void checkNetPerformance()
 /*************************** Version Log ****************************/
 /*
  * $Log: testnet.c,v $
+ * Revision 1.12  1996/01/15  21:33:53  stephene
+ * huh?
+ *
  * Revision 1.11  1995/12/11  06:27:37  stephene
  * *** empty log message ***
  *

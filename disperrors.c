@@ -8,13 +8,13 @@
 ***
 *** Created 21 Nov 95
 ***
-*** $Revision: 1.4 $
-*** $Date: 1995/12/11 06:25:31 $
+*** $Revision: 1.5 $
+*** $Date: 1995/12/15 17:13:45 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/disperrors.c,v 1.4 1995/12/11 06:25:31 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/disperrors.c,v 1.5 1995/12/15 17:13:45 stephene Exp stephene $";
 #endif
 
 
@@ -33,6 +33,7 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/disperrors.c,v 1.
 /* - Defines - */
 
 /* - Function Declarations - */
+void copyErrorFromDa(int tlx, int tly, int block, int oplayerht, int oplayerwid);
 
 
 /* - Global Variables - */ 
@@ -40,7 +41,7 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/disperrors.c,v 1.
 
 
 /* - Start of Code  - */
-
+#ifdef oldstoretoplayer
 void storeTopLayerErrors(Array da)
 {
   /* da is the error vector storing the errors for the output cell for
@@ -61,6 +62,78 @@ void storeTopLayerErrors(Array da)
     allActns.errors[vec][opCell] = da.data[vec];
   }
 }
+#else
+
+void storeTopLayerErrors(Array da)
+{
+  /* da is the error vector storing the errors for the output cell for
+   * each input vector. */
+
+  /* Here we will have to loop over each virtual block, and copy a
+  ** group of output values back into the allActns.error vectors, -
+  ** previously, we just copied one element.
+  */
+
+     
+  int opLayer = netInfo.nLayers - 1;
+  int opCell; /* Index to the output cell in the activation info */
+  int vec, numVecs;
+  int oplayerht, oplayerwid; /* Dimensions of the output layer. */
+  int tlx, tly, block, oplayer;
+  int nrows, ncols, i,j;
+  
+  oplayer = netInfo.nLayers - 1;
+  oplayerht = layerInfo[oplayer].nrows;
+  oplayerwid = layerInfo[oplayer].ncols;
+
+  nrows = da.ht / oplayerht;
+  ncols = da.wid / oplayerwid;
+  tlx = 0; tly=0;		/* top left corner of where to start
+				 * copying from the da array */
+  block =0;			/* virtual block number */
+  for(j=0; j< nrows; j++) {
+    for(i=0; i< ncols; i++) {
+      copyErrorFromDa(tlx, tly, block, oplayerht, oplayerwid);
+      tlx += oplayerwid;
+      block++;
+    }
+    /* next row */
+    tlx = 0;
+    tly += oplayerht;
+  }
+}
+
+void copyErrorFromDa(int tlx, int tly, int block, int oplayerht, int oplayerwid)
+{
+  /* Copy part of the array of error vectors da into the error part of
+  ** the top layer of cells in the net for virtual block number BLOCK.
+  ** The size of the array copied from da is oplayerwid*oplayerht, and
+  ** with the top left hand corner place at tlx, tly in the array
+  */
+
+  Real *dadata, *nextcellerror;
+  int  firstopCell, oplayer;
+  int  i,j, nextline;
+
+  
+  oplayer = netInfo.nLayers - 1;
+  firstopCell = actInfo.startLayer[oplayer];
+  nextline = da.wid - oplayerwid;
+  
+  dadata 		= &(da.data[(tly*da.wid)+tlx]);
+  nextcellerror 	= &(allActns.errors[block][firstopCell]);
+
+  for(j=0; j< oplayerht; j++) {
+    for(i=0; i< oplayerwid; i++) {
+      *nextcellerror++ = *dadata++;
+    }
+    dadata += nextline; /* move onto the start of the next line */
+  }
+  
+}
+
+
+#endif
 
 
 void propagateErrors()
@@ -312,6 +385,12 @@ void createPartials()
 /*************************** Version Log ****************************/
 /*
  * $Log: disperrors.c,v $
+ * Revision 1.5  1995/12/15  17:13:45  stephene
+ * calcErrors modified so that it takes account of the activation
+ * function for cells when taking the derivative of the function -
+ * previously it was assumed that all cells were tanh() cells, which was
+ * ok, given that our hidden layer was tanh() cells
+ *
  * Revision 1.4  1995/12/11  06:25:31  stephene
  * *** empty log message ***
  *

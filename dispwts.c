@@ -9,13 +9,13 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.4 $
-*** $Date: 1995/12/11 06:26:16 $
+*** $Revision: 1.5 $
+*** $Date: 1995/12/13 04:04:47 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispwts.c,v 1.4 1995/12/11 06:26:16 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispwts.c,v 1.5 1995/12/13 04:04:47 stephene Exp stephene $";
 #endif
 
 /********************************************************************/
@@ -117,6 +117,12 @@ Real *nextFreeWeight(int preCellNum, int postCellNum)
   Real *nextwt;
   int nextfree = weightInfo.nextFreeWeight;
 
+  if (nextfree >= weightInfo.maxIndex ) {
+    printf("%s: Have exceeded maximum number of weights %d - change dispdefines.h and recompile\n",
+	   __FUNCTION__, weightInfo.maxIndex);
+    exit(-1);
+  }
+    
   weightInfo.preCell[nextfree] = preCellNum;
   weightInfo.postCell[nextfree] = postCellNum;
   nextwt = &(weightInfo.data[weightInfo.nextFreeWeight]);
@@ -276,6 +282,9 @@ void printWtsInfo()
 /*************************** Version Log ****************************/
 /*
  * $Log: dispwts.c,v $
+ * Revision 1.5  1995/12/13  04:04:47  stephene
+ * Added new function void printWtsInfo() to create weight.info file.
+ *
  * Revision 1.4  1995/12/11  06:26:16  stephene
  * *** empty log message ***
  *

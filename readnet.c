@@ -7,13 +7,13 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.9 $
-*** $Date: 1995/12/11 06:27:18 $
+*** $Revision: 1.10 $
+*** $Date: 1995/12/13 03:44:19 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/readnet.c,v 1.9 1995/12/11 06:27:18 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/readnet.c,v 1.10 1995/12/13 03:44:19 stephene Exp stephene $";
 #endif
 
 
@@ -27,8 +27,9 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/readnet.c,v 1.9 1
 #include "readnet.h"
 #include "rnd.h"
 #include "dispwts.h"
+#include "dispdefines.h"
 /* - Defines - */
-#define MAX_NUM_WEIGHTS 2000
+
 #define TWODTOONED(x,y,wid) ( (wid)*(y) + (x))
 
 /* - Function Declarations - */
@@ -864,7 +865,10 @@ void printNet()
 		 numInputs);
 	wt = layerInfo[layer].cellInfo[cell].wtsStart;
 	for(ip=0; ip < numInputs; ip++) {
+	  /* dont bother printing out the weights here */
+	  /*
 	  printf("Ip %d weight %d\n", layerInfo[layer].cellInfo[cell].inputs[ip], (int)wt);
+	  */
 	  wt++;
 	}
       }
@@ -927,6 +931,10 @@ void printNet()
 /*************************** Version Log ****************************/
 /*
  * $Log: readnet.c,v $
+ * Revision 1.10  1995/12/13  03:44:19  stephene
+ * mod to printNet so that it writes out actn.info file to show how the
+ * cells are numbered.
+ *
  * Revision 1.9  1995/12/11  06:27:18  stephene
  * *** empty log message ***
  *

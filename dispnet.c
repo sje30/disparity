@@ -9,13 +9,13 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.7 $
-*** $Date: 1995/12/08 00:17:32 $
+*** $Revision: 1.8 $
+*** $Date: 1995/12/13 04:03:35 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispnet.c,v 1.7 1995/12/08 00:17:32 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispnet.c,v 1.8 1995/12/13 04:03:35 stephene Exp stephene $";
 #endif
 
 /* Main code file for the Disparity net. */
@@ -36,6 +36,7 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispnet.c,v 1.7 1
 
 
 /* - Function Declarations - */
+void copyNetOutput(int tlx, int tly, int virtualblock, int opwid, int opht);
 void showGnuplot();
 void setUpGnuplot();
 void showActivations (int layer, char *fname);
@@ -296,25 +297,25 @@ void clearUpMemory()
 void setUpGnuplot()
 {
   /* Set up gnuplot for displaying activations */
-  system("gplot -create l0 -geometry 400x200+0+0");
-  system("gplot -create l1 -geometry 400x200+0+226");
-  system("gplot -create l2 -geometry 400x200+0+455");
-  system("gplot -create wts -geometry 400x200+0--15");
+/*   system("gplot -create l0 -geometry 400x200+0+0"); */
+/*   system("gplot -create l1 -geometry 400x200+0+226"); */
+/*   system("gplot -create l2 -geometry 400x200+0+455"); */
+/*   system("gplot -create wts -geometry 400x200+0--15"); */
 }
      
 
 void showGnuplot()
 {
-  system("gplot -to l0 -with linespoints layer0.act");
-  system("gplot -to l1 -with linespoints layer1.act layer1.op");
-  system("gplot -to l2 -with linespoints layer2.act layer2.op");
-  system("gplot -to wts -with linespoints wts0.wts");	
+  int i;
+  char cmd[200];
+
+  for(i=0; i< netInfo.nLayers; i++) {
+    sprintf(cmd, "gplot -to l%d -with linespoints layer%d.act layer%d.op", i, i,i);
+    system(cmd);
+  }
 }
 
 /*** Conversion between half life and lambda ***/
-
-/*** Jim - why have you used log2 rather than just natural logarithm
-     for these functions ? ***/
 
 Real half_life2lambda(Real h)
 {		
@@ -607,7 +608,7 @@ void storeActivations(int input)
   }
 }
 
-
+#ifdef oldgetz
 void getZ()
 {
   /* After all the inputs have been presented, get the Z array */
@@ -629,7 +630,73 @@ void getZ()
     z.data[vecnum] = allActns.allOps[vecnum][indexOpCell];
   }
 }
+#else
 
+void getZ()
+{
+  
+  /*** Local Variables ***/
+  int nrows, ncols, oplayer, opwid, opht;
+  int tlx, tly, virtualblock;
+  int i,j;
+  
+  oplayer = netInfo.nLayers - 1;
+  opwid = layerInfo[oplayer].ncols;
+  opht = layerInfo[oplayer].nrows;
+
+
+  nrows = z.ht / opht;
+  ncols = z.wid / opwid;
+
+  /* clear z beforehand, just to check */
+  setArray(z, 0.0);
+  
+  tlx=0; tly=0; virtualblock =0;
+  for(j=0; j < nrows; j++) {
+    for(i=0; i<ncols; i++) {
+      /*printf("Copy virtual block %d\n", virtualblock); */
+      copyNetOutput(tlx, tly, virtualblock, opwid, opht);
+      /*writeArray(z, "-"); */
+      tlx += opwid;
+      virtualblock++;
+    }
+    /* move onto the next row */
+    tly += opht; tlx=0; 
+  } 
+}
+
+void copyNetOutput(int tlx, int tly, int virtualblock, int opwid, int opht)
+{
+  /* Copy the output cells from the virtual block numbered VIRTUALBLOCK
+   * into the z array, such that the top left hand corner of the z array
+   * to be written into is (tlx, tly)
+   */
+
+  /*** Local Variables ***/
+  Real *zdata, *opdata;
+  int firstopcell, oplayer;
+  int i,j, nextline;
+  oplayer = netInfo.nLayers - 1;
+  firstopcell = actInfo.startLayer[oplayer];
+  
+  zdata = & (z.data[(tly * z.wid) + tlx]);
+  opdata = & (allActns.allOps[virtualblock][firstopcell]);
+	      
+  nextline = z.wid - opwid;	/* how much to increment in order to
+  				** move onto the left hand edge of the
+  				** next row of the z array */
+  
+  for(j=0; j < opht; j++) {
+    for(i=0; i < opwid; i++) {
+      *zdata = *opdata;
+      opdata++;
+      zdata++;
+    }
+    /* move onto next row */
+    zdata += nextline;
+  }
+}
+#endif
 
 
 
@@ -973,6 +1040,9 @@ Rvec_correlate(Real *x, Real *y, int imin, int imax)
 /*************************** Version Log ****************************/
 /*
  * $Log: dispnet.c,v $
+ * Revision 1.8  1995/12/13  04:03:35  stephene
+ * simple comment added
+ *
  * Revision 1.7  1995/12/08  00:17:32  stephene
  * Including the correlation code from Jim (slightly amended)
  *

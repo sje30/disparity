@@ -9,13 +9,13 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.5 $
-*** $Date: 1995/12/15 17:15:03 $
+*** $Revision: 1.6 $
+*** $Date: 1996/01/15 12:50:58 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispinputs.c,v 1.5 1995/12/15 17:15:03 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispinputs.c,v 1.6 1996/01/15 12:50:58 stephene Exp stephene $";
 #endif
 
 /* Functions to provide the input to the disparity network */
@@ -359,21 +359,20 @@ void createInputVectorsAndShiftsOneImage()
   /*** Local Variables ***/  
   int i;
   int colstart, rowstart;
-  Array leftVector, rightVector;
-  Array leftImage, rightImage, shiftsArr;
+  Array leftVector;
+  Array leftImage, shiftsArr;
   int im, elem;
   int vec; /* Current vector being created. */
   int inputCentreRow, inputCentreCol;
   int oneInputSize = inputWid * inputHt;    
-  int inputVectorSize =  NUMEYES * inputWid*inputHt; 
+  int inputVectorSize;
   Real *shiftsData, *inputsdata, *data;
 
 
+  inputVectorSize=  1 * inputWid*inputHt; /* Here we only have one eye */
   createArray( inputWid, inputHt, &leftVector);
-  createArray( inputWid, inputHt, &rightVector);
   
   createArray( totalInputWid, totalInputHt, &leftImage);
-  createArray( totalInputWid, totalInputHt, &rightImage);
   createArray( totalInputWid, totalInputHt, &shiftsArr);
   
   /*** The following two arrays are global variables ***/
@@ -456,8 +455,8 @@ void createInputVectorsAndShiftsOneImage()
   /*** Have now finished creating the input vectors. We can now
    * free the arrays that are no longer needed.  */
   
-  cfree(leftVector.data); cfree(rightVector.data);
-  cfree(leftImage.data); cfree(rightImage.data);
+  cfree(leftVector.data);
+  cfree(leftImage.data); 
   cfree(shiftsArr.data);
   
 }
@@ -538,6 +537,9 @@ void readInputFile(char *inputFile, Array arr)
 /*************************** Version Log ****************************/
 /*
  * $Log: dispinputs.c,v $
+ * Revision 1.6  1996/01/15  12:50:58  stephene
+ * just before snapshot for ali's extensions
+ *
  * Revision 1.5  1995/12/15  17:15:03  stephene
  * changed setBiases() so that the activation function is checked when
  * calculating the cell output. Also put in check for

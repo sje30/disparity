@@ -9,8 +9,8 @@
 ***
 *** Created 10 Nov 95
 ***
-*** $Revision: 1.7 $
-*** $Date: 1995/12/11 06:26:04 $
+*** $Revision: 1.8 $
+*** $Date: 1995/12/13 04:04:04 $
 ****************************************************************************/
 
 
@@ -104,12 +104,23 @@ int doLearning;			/* If non zero (default), then do
 				 * images through the network, and
 				 * calculate the correlation. */
 
-
+int oneImage;			/* Do we want to read in one image or two?
+				 * Default 0 - means we have more than one
+				 * image file. */
+int compcorrn;			/* Do we want to compute correlation?
+				 * If non zero, correlation is computed.
+				 * Default: 1*/
+int usegnuplot;			/* Should we use gnuplot to display
+				 * network activity? If non zero, then
+				 * use gnuplot. Default: 0.  */
 #endif
 
 
 /*************************** Version Log ****************************/
 /* $Log: dispvars.h,v $
+ * Revision 1.8  1995/12/13  04:04:04  stephene
+ * *** empty log message ***
+ *
  * Revision 1.7  1995/12/11  06:26:04  stephene
  * new params: initWts, doLearning, results
  *
