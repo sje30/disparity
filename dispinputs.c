@@ -9,13 +9,13 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.2 $
-*** $Date: 1995/11/17 00:04:26 $
+*** $Revision: 1.3 $
+*** $Date: 1995/11/21 23:31:48 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispinputs.c,v 1.2 1995/11/17 00:04:26 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispinputs.c,v 1.3 1995/11/21 23:31:48 stephene Exp stephene $";
 #endif
 
 /* Functions to provide the input to the disparity network */
@@ -171,7 +171,11 @@ void testInputVectors()
 void createInputVectorsAndShifts()
 {
   /* Create the input vectors to be supplied to the network, and 
-   * the array of shifts. */
+   * the array of shifts.
+   * Sat Dec  9 1995.
+   * Modifiying routine so that it can read in inputs from a 2d image
+   * in multiple rows, rather than assuming input image is one long row.
+   */
 
   /*** Local Variables ***/  
   int i;
@@ -202,6 +206,14 @@ void createInputVectorsAndShifts()
   readInputFile( image2File, rightImage);
   readInputFile( shiftsFile, shiftsArr);
 
+  /* The first input vector is to be read from the top left hand
+   *  corner of the left and right image.
+   *
+   * Consecutive inputs are then taken by moving colstart along the
+   * image until it gets to the end of a row.  Once at the end of a
+   * row, if more images are needed, then rowstart is incremented to
+   * move onto some more data.  */
+     
   colstart = 0;
   rowstart = 0;
   inputsdata = inputs.data;
@@ -215,8 +227,9 @@ void createInputVectorsAndShifts()
 	 inputCentreCol);
 #endif
   
-  
+  /* Extract the input vectors */
   for(vec=0; vec< numInputVectors; vec++) {
+    
     extractInputVector(leftImage, leftVector, colstart, rowstart);
     extractInputVector(rightImage, rightVector, colstart, rowstart);
 	
@@ -253,12 +266,30 @@ void createInputVectorsAndShifts()
     } /* next image. */
 
     /* move onto the next vector */
-    colstart += inputWid + inputSkip;
-  }
+    colstart += inputWid + inputSkipX;
+
+    if ( ( (colstart+inputWid) > leftImage.wid) &&
+	(vec != (numInputVectors - 1) ) ) /* not last input vector */
+      {
+	/* We have gone over the edge of the input images, and so we
+	 * need to move onto the next row of the image.
+	 * Reset colstart and increment rowstart. */
+	
+	colstart = 0;
+	rowstart += inputHt + inputSkipY;
+	
+	/* Check to see if rowstart is valid, ie. we have not gone over
+	   the edge of the images. */
+	if ( ( (rowstart+inputHt) > leftImage.ht) &&
+	    (vec != (numInputVectors - 1) ) )/* not last input vector */ {
+	      printf("%s: Error:  Will be reading beyond the image. Reading InputVector %d, rowstart %d\n", __FUNCTION__, vec, rowstart);
+	      exit(-1);
+	    }
+      }
+  } /* next vec */
   
   /*** Have now finished creating the input vectors. We can now
-   * free the arrays that are no longer needed.
-   */
+   * free the arrays that are no longer needed.  */
   
   cfree(leftVector.data); cfree(rightVector.data);
   cfree(leftImage.data); cfree(rightImage.data);
@@ -342,6 +373,9 @@ void readInputFile(char *inputFile, Array arr)
 /*************************** Version Log ****************************/
 /*
  * $Log: dispinputs.c,v $
+ * Revision 1.3  1995/11/21  23:31:48  stephene
+ * About to include CG Code
+ *
  * Revision 1.2  1995/11/17  00:04:26  stephene
  * *** empty log message ***
  *
@@ -349,4 +383,3 @@ void readInputFile(char *inputFile, Array arr)
  * Initial revision
  *
  */
-
