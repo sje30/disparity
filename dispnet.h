@@ -9,8 +9,8 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.9 $
-*** $Date: 1995/12/07 15:42:46 $
+*** $Revision: 1.10 $
+*** $Date: 1995/12/08 00:17:48 $
 ****************************************************************************/
 
 
@@ -159,7 +159,7 @@ typedef struct {
  *            from 0 to the Nlayers-1. Layer 0 is the input layer.  */
 
 typedef struct {
-  int nLayers;
+  int nLayers;			/* Number of layers in the net. */
   double f;			/* Value of the merit function */
 } netInfo_t;
 
@@ -205,10 +205,13 @@ typedef struct {
  * for cell i.  Each array allOps[i] and allActs[i] are of size
  * [0..numUnits-1].
  *
+ * This is quite a large structure, as it stores all of the
+ * activations, outputs and errors for each input vector.
+ *
  * Relevant functions:
- * createAllActns(), freeAllActns(), storeAllActns().
- * void printAllActns(char *fname)
- */
+ *
+ * createAllActns(), freeAllActns(), storeAllActns().  void
+ * printAllActns(char *fname) */
 
 /*** Function definitions ***/
 void calcAllActivations();
@@ -264,6 +267,9 @@ layerInfo_t	*layerInfo;
 
 /*************************** Version Log ****************************/
 /* $Log: dispnet.h,v $
+ * Revision 1.10  1995/12/08  00:17:48  stephene
+ * Inclusion of Rvec_correlate
+ *
  * Revision 1.9  1995/12/07  15:42:46  stephene
  * post nips sort out
  *

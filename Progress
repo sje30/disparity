@@ -105,11 +105,44 @@ gauss600a.prm - 60 x 60
 
 gauss600b.prm - 40 x 40
 
-gauss600c.prm - 100 x 100
+gauss600c.prm - 100 x 100. ok, but uhalf of 2 and vhalf of 200 are too
+small, as seen by looking at umask and vmask. need bigger masks I feel.
 
 
 - to do: run on egg box 500 x 500 would be nice idea.
  
 
+Sun Dec 10 1995
+---------------
+
+Daily snapshot - sun10dec created.
+
+100x100 (gauss600c) ok , but taking a very long time.  20 hours to do
+500 iterations.  This could be speeded up by analysing conj grad and
+only evaluating the derivative if the weights are the same as last
+time.
+But dont worry about this yet.
+
+Need to write code so that the function can we can read in two images
+and just get the output without needing to do any training.
+
+This is done - see the params initWts, doLearning
+
+
+7-45pm.  Sin 500 x 500 image 2 data is corrupted:
+
+/tmp/JIMS/sin_500_by_500_period500 3 wc *
+wc *
+     501  250005 2365839 image1.txt
+     118   58418  552960 image2.txt
+     501  250005 2375527 shifts.txt
+    1120  558428 5294326 total
+
+Example: tested net on gauss600 and then checked performacnce on
+eggbox data.
+(testnet ~/disparity/gauss600.40x40.prm to train)
+(testnet ~/disparity/checkegg.prm to test)
+
+results in /rsunq/vision/stephene/dispruns/testthench
 
 

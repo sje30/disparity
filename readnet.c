@@ -7,13 +7,13 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.7 $
-*** $Date: 1995/11/21 23:33:39 $
+*** $Revision: 1.8 $
+*** $Date: 1995/12/10 17:55:25 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/readnet.c,v 1.7 1995/11/21 23:33:39 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/readnet.c,v 1.8 1995/12/10 17:55:25 stephene Exp stephene $";
 #endif
 
 
@@ -58,7 +58,10 @@ static void printNet();
 void readNet(char *fname)
 
 {
-  /* read in the network structure from the file fname. */
+  /* Read in the network structure from the file FNAME
+   *
+   * The relevant activation structures for the network are then created.
+   */
 
   /*** Local Variables ***/
 
@@ -906,6 +909,9 @@ void printNet()
 /*************************** Version Log ****************************/
 /*
  * $Log: readnet.c,v $
+ * Revision 1.8  1995/12/10  17:55:25  stephene
+ * *** empty log message ***
+ *
  * Revision 1.7  1995/11/21  23:33:39  stephene
  * About to include CG Code
  *

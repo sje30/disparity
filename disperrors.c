@@ -8,13 +8,13 @@
 ***
 *** Created 21 Nov 95
 ***
-*** $Revision: 1.2 $
-*** $Date: 1995/11/23 16:19:33 $
+*** $Revision: 1.3 $
+*** $Date: 1995/12/07 15:42:34 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/disperrors.c,v 1.2 1995/11/23 16:19:33 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/disperrors.c,v 1.3 1995/12/07 15:42:34 stephene Exp stephene $";
 #endif
 
 
@@ -166,12 +166,16 @@ void calcErrors( int layer, int vec)
     }
 
     /* Pass through derivative function */
+    /* Note that this assumes that the cell has a tanh() activation
+     * function.  This should be tested by looking at the layerInfo
+     * structures.
+     */
+       
     actn = actns[thiscell];
     deriv = dtanh(actn);
     /*
     printf("Activation of this cell is %lf - after deriv %lf\n",
-	   actn, deriv);
-	   */
+	   actn, deriv); */
 
     sum *= deriv;
     
@@ -279,6 +283,9 @@ void createPartials()
 /*************************** Version Log ****************************/
 /*
  * $Log: disperrors.c,v $
+ * Revision 1.3  1995/12/07  15:42:34  stephene
+ * post nips sort out
+ *
  * Revision 1.2  1995/11/23  16:19:33  stephene
  * CG now installed
  *

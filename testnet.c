@@ -9,13 +9,13 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.9 $
-*** $Date: 1995/12/09 16:42:01 $
+*** $Revision: 1.10 $
+*** $Date: 1995/12/10 17:55:45 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.9 1995/12/09 16:42:01 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.10 1995/12/10 17:55:45 stephene Exp stephene $";
 #endif
 
 
@@ -42,7 +42,7 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.9 1
 extern int	yylex();
 double evalMeritFunction();
 static void printParams();
-
+void checkNetPerformance();
 
 /* - Global Variables - */ 
 
@@ -309,7 +309,16 @@ netmain(int argc, char *argv[])
 
   setUpNetwork( argv[1]);
 
+  /* Decide if we want to do learning, or just test the performance of
+   * the network on the input images */
 
+  if ( !doLearning) {
+    checkNetPerformance();
+    
+    exit(-1);
+  }
+
+  /* Ok, we must want to do learning... */
   opfp = fopen( "dispoutputs", "w");
   if (! opfp ) {
     printf("%s: %s could not be opened for writing",
@@ -321,8 +330,7 @@ netmain(int argc, char *argv[])
   maxWtIndex = weightInfo.numWts - 1;
 /*  
   f = evalFn(weightInfo.data);
-  printf("F has been evaluated to %lf\n", f);
-*/
+  printf("F has been evaluated to %lf\n", f); */
 
 
   if (checker) {
@@ -694,6 +702,10 @@ void setParamDefaults()
   useHalf = 0;
   uhalf = 32;
   vhalf = 320;
+
+  strcpy(initWts, "none");
+  strcpy(results, "results");
+  doLearning = 1; 
 }
 
 void printParams()
@@ -727,7 +739,11 @@ void printParams()
   printf("cgmax = %d\n", cgmax);
   printf("checker = %d\n", checker);
 
-  printf("maxiterations = %d\n", maxiterations); 
+  printf("maxiterations = %d\n", maxiterations);
+
+  printf("initWts = %s\n", initWts);
+  printf("results = %s\n", results); 
+  printf("doLearning = %d\n", doLearning); 
 }
 
 
@@ -742,10 +758,69 @@ void copyVec(Real *wdest, Real *wsrc, int numWeights)
   }
 }
 
+
+void checkNetPerformance()
+{
+  /* Just read in the initial weights and run the input images through
+   * the network to see how the network performs.
+   */
+
+
+  /*** Local Variables ***/
+  int vecnum;
+  double corrn;
+  
+  printf("Just checking the network's performance\n");
+  
+  printf("reading in wts from file %s\n", initWts);
+  readWts(initWts);
+  
+  /* Debug: write out the weights again just to check that the wts were
+   * read in ok.  */
+  writeWts("checkwts");
+
+  /* Now run each input vector through the network... */
+  /* This chunk of code was copied from  calcMeritAndPartials(). */
+     
+  for(vecnum=0; vecnum< numInputVectors; vecnum++) {
+    /*
+       
+    if ((vecnum % 10 )== 0) {
+      printf("Using input vector %d\n", vecnum);
+    }
+    */
+    clearActivationArray();
+    setBiases();
+    getNextInputVector(vecnum);
+    
+    calcAllActivations();
+/*     showAllActivations(); */
+/*    showGnuplot(); */
+
+    storeActivations(vecnum);
+  }
+  getZ();
+
+  /* Finally, now we have the outputs in z, we can dump them out to the file.
+   */
+  
+  writeArray(z, results);
+
+  /* Get the correlation */
+  corrn = Rvec_correlate(z.data, shifts.data, 0, numInputVectors );
+  printf("Correlation %lf\n", corrn);
+
+
+  
+}
+
   
 /*************************** Version Log ****************************/
 /*
  * $Log: testnet.c,v $
+ * Revision 1.10  1995/12/10  17:55:45  stephene
+ * Looking at 2d networks now.
+ *
  * Revision 1.9  1995/12/09  16:42:01  stephene
  * *** empty log message ***
  *

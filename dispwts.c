@@ -9,18 +9,18 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.2 $
-*** $Date: 1995/11/17 00:06:02 $
+*** $Revision: 1.3 $
+*** $Date: 1995/11/21 23:33:09 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispwts.c,v 1.2 1995/11/17 00:06:02 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispwts.c,v 1.3 1995/11/21 23:33:09 stephene Exp stephene $";
 #endif
 
+/********************************************************************/
 /* Functions to create and manipulate weights for disparity program */
-
-
+/********************************************************************/
   
 /* -  Include Files - */
 #include <stdio.h>
@@ -209,9 +209,39 @@ void writeWts(char *fname)
   fclose(fp);
 }
 
+
+void readWts(char *fname)
+{
+  /* Read in the weights from the file FNAME into the weights data structure. */
+  
+  /*** Local Variables ***/  
+  int i;
+  Real *data, val;
+  FILE	*fp;
+
+  fp = fopen( fname, "r");
+  if (! fp ) {
+    printf("%s: %s could not be opened for reading",
+	   __FUNCTION__, fname);
+    exit(-1);
+  }
+
+  i = weightInfo.numWts;
+
+  data = weightInfo.data;
+  for(;i-->0;) {
+    fscanf(fp, "%lf\n", &val);
+    *data++ = val;
+  }	
+  fclose(fp);
+}
+
 /*************************** Version Log ****************************/
 /*
  * $Log: dispwts.c,v $
+ * Revision 1.3  1995/11/21  23:33:09  stephene
+ * About to include CG Code
+ *
  * Revision 1.2  1995/11/17  00:06:02  stephene
  * New randomise procedure for the weights provided by Jim.
  *
