@@ -9,8 +9,8 @@
 ***
 *** Created 10 Nov 95
 ***
-*** $Revision: 1.3 $
-*** $Date: 1995/11/23 16:20:04 $
+*** $Revision: 1.4 $
+*** $Date: 1995/12/07 15:42:57 $
 ****************************************************************************/
 
 
@@ -68,11 +68,21 @@ int checker;			/* Do we use conjugate gradient or
 
 int maxiterations;		/* Maximum number of iterations for CG
 				 * to perform.  Default is 100. */
+
+int useHalf;			 /* If nonzero, use uhalf and vhalf to
+				  * specify the half lives for U and
+				  * V.  Otherwise, use ulambda and
+				  * vlambda.  Default is 0. */
+int uhalf, vhalf; 		/* Half lives of U and V */
+
 #endif
 
 
 /*************************** Version Log ****************************/
 /* $Log: dispvars.h,v $
+ * Revision 1.4  1995/12/07  15:42:57  stephene
+ * post nips sort out
+ *
  * Revision 1.3  1995/11/23  16:20:04  stephene
  * CG now installed
  *
