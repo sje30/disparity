@@ -8,13 +8,13 @@
 ***
 *** Created 17 Nov 95
 ***
-*** $Revision: 1.1 $
-*** $Date: 1995/11/17 21:03:47 $
+*** $Revision: 1.2 $
+*** $Date: 1995/11/21 23:33:49 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testconvolve.c,v 1.1 1995/11/17 21:03:47 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testconvolve.c,v 1.2 1995/11/21 23:33:49 stephene Exp stephene $";
 #endif
 
 /* Simple functions to test the convolve function */
@@ -25,12 +25,14 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testconvolve.c,v 
 #include <math.h>
 
 #include "convolve.h"
-#include "gen.h"
+/*#include "gen.h" */
 #include "rnd.h"
 
 /* - Defines - */
 
 /* - Function Declarations - */
+/* Copied printDoubleArray from mygen.c for portability */
+void printDoubleArray(FILE *stream, double *arr, int wid, int ht);
 void test2d2();
 void test2d();
 void test1d();
@@ -145,9 +147,31 @@ void testConvolve1d()
 
 }
 
+void printDoubleArray(FILE *stream, double *arr, int wid, int ht)
+{
+  /* Array is a 2d floating point array of size wid*ht, stored as a 1d
+   * array, row by row. The array is printed to the filepointer (which
+   * can be stdout)
+   */
+  
+  /*** Local Variables ***/
+  int i;
+  while (--ht >= 0)  {
+    i=wid;
+    while (--i >= 0) {
+      fprintf(stream, "%lf ", *(arr++));
+    }
+    fprintf(stream, "\n");
+  }
+}
+
+
 /*************************** Version Log ****************************/
 /*
  * $Log: testconvolve.c,v $
+ * Revision 1.2  1995/11/21  23:33:49  stephene
+ * About to include CG Code
+ *
  * Revision 1.1  1995/11/17  21:03:47  stephene
  * Initial revision
  *
