@@ -9,8 +9,8 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.2 $
-*** $Date: 1995/11/17 00:06:21 $
+*** $Revision: 1.3 $
+*** $Date: 1995/11/21 23:33:20 $
 ****************************************************************************/
 
 
@@ -23,11 +23,15 @@ Real *nextFreeWeight(int preCellNum, int postCellNum);
 void noMoreWeights();		
 void initWtsRnd();
 void writeWts(char *fname);
+void readWts(char *fname);
 #endif
 
 
 /*************************** Version Log ****************************/
 /* $Log: dispwts.h,v $
+ * Revision 1.3  1995/11/21  23:33:20  stephene
+ * About to include CG Code
+ *
  * Revision 1.2  1995/11/17  00:06:21  stephene
  * Daily update
  *
