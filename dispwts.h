@@ -1,6 +1,6 @@
 /****************************************************************************
 ***
-*** Time-stamp: <>
+*** Time-stamp: <12 Nov 95 22:16:44 stephene>
 ***
 *** dispwts.h
 *** 
@@ -9,8 +9,8 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision$
-*** $Date$
+*** $Revision: 1.1 $
+*** $Date: 1995/11/12 22:16:31 $
 ****************************************************************************/
 
 
@@ -22,11 +22,14 @@ void freeWeights();
 Real *nextFreeWeight();
 void noMoreWeights();		
 void initWtsRnd();
-
+void writeWts(char *fname);
 #endif
 
 
 /*************************** Version Log ****************************/
-/* $Log$
+/* $Log: dispwts.h,v $
+ * Revision 1.1  1995/11/12  22:16:31  stephene
+ * Initial revision
+ *
  *
  */

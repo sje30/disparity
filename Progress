@@ -16,11 +16,46 @@ function getInputVector() gets the nextInputVector.
 * Activation of cells calculated calcActivation() in dispnet.c
 works in a slowsum or fast method (use slow to check.)
 
+* Mon Nov 13 1995
+
+** preCellInfo added - can now determine which output cells are
+connected to by an input cell. This is the reverse of cellInfo.
+
+* Thu Nov 16 1995 
+Sorted the learniing algorithm on paper. Now need to implement it.
+This will involve several functions:
+	readInData:
+	read in the data for each eye and also the shift arrays 
+
+	define and create the virtual output array.
+	? what size is it?  2d or 1d?
+
+	redefine the activations array - it really should be
+	activations for total input to a cell, and then output from
+	the cell.
+
+	Write function to run over all of the input sequence, creating
+	and storing the activations.  We will actually need the
+	activation levels of all of the cells for each input presented
+	I think.
+
+	when writing derivative of tanh function, must consider using
+	the better derivative 1.0 / cosh^2 x rather than (1- tanh^2 x)
+
+	Check the convolution procedures.
+
+	Where will the delta's be stored?
+	Propagate the delta's back along the cell layers.
+
+	Jim: example code that calls the cong_grad.
+	why use log2 in the half life calcs, rather than ln (natural
+	log) , and if so, where is log2() defined on system?
+
+	correlation between disparity and output from cells.
+
+
 Things to do
 ------------
-
-
-* Check number of weights being allocated ok.
 
 * ? How many input vectors per epoch?
 
@@ -29,6 +64,3 @@ Things to do
 * Calculate errors for each cell.
 
 * Write the derivative function that creates the derivative at a point.
-
-
-* Diagnostics: ?use gplot to monitor the op values?

@@ -9,13 +9,13 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.1 $
-*** $Date: 1995/11/12 23:37:48 $
+*** $Revision: 1.2 $
+*** $Date: 1995/11/13 22:14:48 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispnet.c,v 1.1 1995/11/12 23:37:48 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispnet.c,v 1.2 1995/11/13 22:14:48 stephene Exp stephene $";
 #endif
 
 /* Main code file for the Disparity net. */
@@ -36,6 +36,7 @@ void showGnuplot();
 void setUpGnuplot();
 void showActivations (int layer, char *fname);
 void showAllActivations();
+void showOutputs(int layer, char *fname);
 
 
 /* - Global Variables - */ 
@@ -94,12 +95,12 @@ void calcActivation(int layer)
     wtStart = cellInfo.wtsStart	;
     numInputs = cellInfo.numInputs;
     inputs = cellInfo.inputs;
-#undef slowsum
+#define slowsum
 #ifdef slowsum    
     sum = 0.0;
     for(;numInputs-- > 0; ) {	
 /*       in = **ptrInputs; */
-      in = actInfo.actn[*inputs];
+      in = actInfo.op[*inputs];
       wt = *wtStart;
       res = in * wt;
       printf ("input %lf * wt %lf = %lf\n", in, wt, res);
@@ -118,6 +119,9 @@ void calcActivation(int layer)
 #endif
     printf("Actn cell %d is %lf\n", cell, sum);
 
+    /* Store the activation of the cell */
+    actInfo.actn[offset+cell] = sum;
+    
     actFN = layerInfo[layer].actfn;
     /* Now pass through the activation function of the cells */
     switch (actFN) {
@@ -137,9 +141,9 @@ void calcActivation(int layer)
     }
     printf("Op cell %d is %lf\n", cell, sum);
   
-  /* Store the activation of the cell */
+    /* Store the output of the cell */
+    actInfo.op[offset+cell] = sum;
 
-    actInfo.actn[offset+cell] = sum;
   } /* next unit*/
 }
 
@@ -166,6 +170,10 @@ void showAllActivations()
   for(layer=0; layer < nlayers; layer++) {
     sprintf(fname,"layer%d.act", layer);
     showActivations(layer, fname);
+
+    sprintf(fname,"layer%d.op", layer);
+    showOutputs(layer, fname);
+
   }
 }
 
@@ -226,6 +234,39 @@ void showActivations(int layer, char *fname)
   fclose(fp);
 }
 
+
+void showOutputs(int layer, char *fname)
+{
+  /* Write out the outputs of layer LAYER to the file called
+     fname. */
+
+  /*** Local Variables ***/
+
+  int unit;
+  int ncells;
+  FILE	*fp;
+  int offset;
+
+
+  fp = fopen( fname, "w");
+  if (! fp ) {
+    printf("%s: %s could not be opened for writing",
+	   __FUNCTION__, fname);
+    exit(-1);
+  }
+  offset = actInfo.startLayer[layer];
+  ncells = layerInfo[layer].ncells;
+  for(unit=0; unit<ncells; unit++) {
+    fprintf(fp,"%lf\n", actInfo.op[offset+unit]);
+  }
+
+  if (layerInfo[layer].bias ==Bias) {
+    fprintf(fp,"%lf\n", actInfo.op[ actInfo.biasIndex[layer] ]);
+  }
+  /* Finish up */
+  fclose(fp);
+}
+
 void clearUpMemory()
 {
   /* Clear up the memory at the end of the program */
@@ -252,13 +293,38 @@ void setUpGnuplot()
 void showGnuplot()
 {
   system("gplot -to l0 -with linespoints layer0.act");
-  system("gplot -to l1 -with linespoints layer1.act");
-  system("gplot -to l2 -with linespoints layer2.act");
+  system("gplot -to l1 -with linespoints layer1.act layer1.op");
+  system("gplot -to l2 -with linespoints layer2.act layer2.op");
   system("gplot -to wts -with linespoints wts0.wts");	
 }
+
+/*** Conversion between half life and lambda ***/
+
+/*** Jim - why have you used log2 rather than just natural logarithm
+     for these functions ? ***/
+
+Real half_life2lambda(Real h)
+{		
+  Real lambda;
+	
+  lambda = pow(2.72,(-1.0/h));
+  return(lambda);
+}
+
+Real lambda2half_life(Real lam)
+{	
+  Real h, L;
+  L = log(lam);
+  h = -1.0/L;
+  return(h);
+}
+
 /*************************** Version Log ****************************/
 /*
  * $Log: dispnet.c,v $
+ * Revision 1.2  1995/11/13  22:14:48  stephene
+ * Daily Change
+ *
  * Revision 1.1  1995/11/12  23:37:48  stephene
  * Initial revision
  *
