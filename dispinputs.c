@@ -9,13 +9,13 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.8 $
-*** $Date: 1997/06/13 19:33:33 $
+*** $Revision: 1.9 $
+*** $Date: 1997/06/17 23:00:07 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsunx/home/stephene/disparity/dispinputs.c,v 1.8 1997/06/13 19:33:33 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsunx/home/stephene/disparity/dispinputs.c,v 1.9 1997/06/17 23:00:07 stephene Exp stephene $";
 #endif
 
 /* Functions to provide the input to the disparity network */
@@ -293,9 +293,14 @@ void createInputVectorsAndShifts()
      * row    rowstart + inputCentreCol
      */
 
-    elem = ( (rowstart+inputCentreRow) * shiftsArr.wid) +
-      (colstart + inputCentreCol);
-    shifts.data[vec] = shiftsArr.data[elem];
+    if (noshifting) {
+      shifts.data[vec] = shiftsArr.data[vec];
+    } else {
+      /* default behaviour preserved for disparity expts. */
+      elem = ( (rowstart+inputCentreRow) * shiftsArr.wid) +
+	(colstart + inputCentreCol);
+      shifts.data[vec] = shiftsArr.data[elem];
+    }
 
     /* Now store these vectors in the inputs array. */
     for(im=0; im< NUMEYES; im++) {
@@ -559,7 +564,8 @@ Real getOrientation(Array source, FILE *fp)
   Real	numerator, denominator, orientation;
   Real	xd,yd;
   Real	a,b,c, eMin, eMax, sq1, sinTerm, cosTerm, roundness;
-
+  Real  pixelthresh=0.2;	/* min. value for a pixel to be accepted
+				 * in calculation. */
 
   sourcewid = source.wid; sourceht = source.ht; sourcedata = source.data;
   numPoints = 0;
@@ -567,7 +573,7 @@ Real getOrientation(Array source, FILE *fp)
   for (y=0; y < sourceht; y++) {
     for (x=0; x < sourcewid; x++) {
 
-      if ( *sourcedata++) {
+      if ( *sourcedata++ > pixelthresh) {
 	numPoints++;
 	sum00 += 1;  	/* *B(x,y) */
 	sum01 += (1*y);  	/* *B(x,y) */
@@ -587,7 +593,7 @@ Real getOrientation(Array source, FILE *fp)
   for (y=0; y < sourceht; y++) {
     for (x=0; x < sourcewid; x++) {
 
-      if ( *sourcedata++) {
+      if ( *sourcedata++ > pixelthresh) {
 	
 	xd = x-xBar;
 	yd = y-yBar;
@@ -725,6 +731,10 @@ Real sqr(Real x)
 /*************************** Version Log ****************************/
 /*
  * $Log: dispinputs.c,v $
+ * Revision 1.9  1997/06/17  23:00:07  stephene
+ * added normInput variable for choice of normalising input
+ * and then introduced code to do the normalisation
+ *
  * Revision 1.8  1997/06/13  19:33:33  stephene
  * added code for computing orientation of each input vector
  *
