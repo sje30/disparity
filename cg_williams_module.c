@@ -46,6 +46,8 @@
  */
 
 
+/* simple addition */
+
 #include <math.h>
 #include <stdio.h>
 #include "cg_williams_module.h"
@@ -461,13 +463,13 @@ eval*/
 ***
 *** Created 23 Nov 95
 ***
-*** $Revision: 1.2 $
-*** $Date: 1995/12/07 15:42:25 $
+*** $Revision: 1.3 $
+*** $Date: 1995/12/08 00:17:07 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/cg_williams_module.c,v 1.2 1995/12/07 15:42:25 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/cg_williams_module.c,v 1.3 1995/12/08 00:17:07 stephene Exp stephene $";
 #endif
 
 
@@ -475,6 +477,9 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/cg_williams_modul
 /*************************** Version Log ****************************/
 /*
  * $Log: cg_williams_module.c,v $
+ * Revision 1.3  1995/12/08  00:17:07  stephene
+ * Found bugs in header file for definitions of JMAX and FALSE
+ *
  * Revision 1.2  1995/12/07  15:42:25  stephene
  * post nips sort out
  *
