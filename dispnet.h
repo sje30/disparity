@@ -9,8 +9,8 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.3 $
-*** $Date: 1995/11/12 23:06:27 $
+*** $Revision: 1.4 $
+*** $Date: 1995/11/13 22:10:41 $
 ****************************************************************************/
 
 
@@ -41,7 +41,7 @@ typedef struct {
  *		of the input cell in the activations array that is
  *		part of the input to this cell.
  *		ptrInputs stores the pointer to the input cell.
- *		i.e. ptrInput[i] = & (actInfo.actn[ inputs[i] ]);
+ *		i.e. ptrInput[i] = & (actInfo.op[ inputs[i] ]);
  */
 
 /* There is one cellInfo structure for each cell in the op layer, but
@@ -120,6 +120,7 @@ typedef struct {
 
 typedef struct {
   Real *actn;
+  Real *op;
   int  *startLayer;
   int  *biasIndex;
   int  size;
@@ -128,6 +129,8 @@ typedef struct {
 /* ActivationInfo:	Stores the activation level of the cells 
  * 
  * actn			actn[i] stores the activation level of the ith cell
+ *
+ * op			op[i] stores the output of the ith cell.
  *
  * startLayer 		startLayer[i] stores the index to the start of the
  *			cells for the ith layer
@@ -173,6 +176,9 @@ layerInfo_t	*layerInfo;
 
 /*************************** Version Log ****************************/
 /* $Log: dispnet.h,v $
+ * Revision 1.4  1995/11/13  22:10:41  stephene
+ * New structure preCellInfo_t to store pre synaptic cell Information
+ *
  * Revision 1.3  1995/11/12  23:06:27  stephene
  * Daily change
  *
