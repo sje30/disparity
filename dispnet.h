@@ -9,8 +9,8 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.4 $
-*** $Date: 1995/11/13 22:10:41 $
+*** $Revision: 1.5 $
+*** $Date: 1995/11/17 00:05:31 $
 ****************************************************************************/
 
 
@@ -58,6 +58,9 @@ typedef struct {
  				   will be zero, and then incremented */
   Real **wts;			/* wts[i] stores a pointer to the ith
  				   fan out weight from this cell*/
+  int *wtsIndex;		/* wtsIndex[i] is the weight number
+    				   that connects this preCell to
+    				   outputCell.*/
   int *outputs;			/* output[i] stores the number of the
  				   postsynaptic cell that this weight
  				   is connected to. */
@@ -156,11 +159,71 @@ typedef struct {
 } netInfo_t;
 
 
+typedef struct {
+  Real	*data;
+  int	wid;
+  int	ht;
+}  Array;
+
+/* Array is a simple structure for a 2d array. If the array is one
+ * dimensional, then the ht element is set to 1. */
+
+
+typedef struct {
+  Real	*data;
+  int	wid;
+  int	ht;
+  int	centre; /* Centre element of the mask, whether it is 1D or 2D */
+  int	maskExtent;
+} Mask;	
+
+/* Mask: simple 2d array like structure used for convolutions.
+ * If the array is one dimensional, then the height element will be one. 
+ */
+
+
+typedef struct {
+  int	num;
+  Real	**allActs;
+  Real	**allOps;
+  int	numUnits;
+} allActns_t;
+
+/*
+ * allActs is an array of size [0..num-1].  allActs[i] points to an
+ * array, which stores the activations for the network when presented
+ * with the ith input vector.  allOps[i] stores the array of output
+ * values when the network is presented with the ith input vector.
+ * Each array allOps[i] and allActs[i] are of size [0..numUnits-1].
+ *
+ * Relevant functions:
+ * createAllActns(), freeAllActns(), storeAllActns().
+ */
 
 /*** Function definitions ***/
 void calcAllActivations();
 void calcActivation(int layer);
 void clearUpMemory();
+
+/* General Array functions */
+void createArray( int wid, int ht, Array *rarr);
+void createRndArray( int wid, int ht, Array *rarr);
+void freeArray(Array arr);
+void writeArray(Array arr, char *fname);
+
+void setParamDefaults();
+void getParams(char *fname);
+
+void createAllActns();
+void freeAllActns();
+void storeActivations(int input);
+
+void getZ();
+void createZs();
+void freeZs();
+
+
+double arrayDist(Array a1, Array a2);
 
 /************************* Global Variables *************************/
 weightInfo_t	weightInfo;
@@ -176,6 +239,10 @@ layerInfo_t	*layerInfo;
 
 /*************************** Version Log ****************************/
 /* $Log: dispnet.h,v $
+ * Revision 1.5  1995/11/17  00:05:31  stephene
+ * Added new element op to the activation Info array - this stores the
+ * actual output from the cells.
+ *
  * Revision 1.4  1995/11/13  22:10:41  stephene
  * New structure preCellInfo_t to store pre synaptic cell Information
  *
