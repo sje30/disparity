@@ -9,13 +9,13 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.7 $
-*** $Date: 1995/12/07 15:43:14 $
+*** $Revision: 1.8 $
+*** $Date: 1995/12/08 00:18:00 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.7 1995/12/07 15:43:14 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.8 1995/12/08 00:18:00 stephene Exp stephene $";
 #endif
 
 
@@ -28,6 +28,7 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testnet.c,v 1.7 1
 #include "dispvars.h"
 #include "readnet.h"
 #include "dispwts.h"
+#include "dispmasks.h"
 #include "dispglobals.h"
 #include "disperrors.h"
 #include "testnet.h"
@@ -109,7 +110,8 @@ the dimensionality of the input vectors (%d)\n",
   /* Weights must have been allocated before this routine is called,
    * as it must know the number of weights that were allocated. */
   createdw();
-  
+
+
   createMasks();
   writeMask(uMask, "umask");
   writeMask(vMask, "vmask");
@@ -254,7 +256,32 @@ the dimensionality of the input vectors (%d)\n",
    * as it must know the number of weights that were allocated. */
   createdw();
 
-  createMasks();
+  /************************/
+  /*** Create the masks ***/
+  /************************/
+
+  /* See if we want to convert half lifes to lambda */
+  if (useHalf) {
+    ulambda = half2lambda(uhalf);
+    vlambda = half2lambda(vhalf);
+  }
+
+  printf("Ulambda %lf\tVlambda %lf\n", ulambda, vlambda);
+  
+    
+  /* At this point, we need to decide whether to set up 2d masks or 1d
+   * masks.  This will be done according to the value of outputHt.
+   */
+
+  if (outputHt == 1) {
+    /* 1d Masks needed */
+    createMasks();
+  }
+  else {
+    /* 2d masks needed */
+    createMasks2();
+  }
+    
   writeMask(uMask, "umask");
   writeMask(vMask, "vmask");
   writeMask(uMaskD, "umaskD");
@@ -633,6 +660,10 @@ void setParamDefaults()
   checker = 1;			/* Check code rather than use CG to learn. */
 
   maxiterations = 100;
+
+  useHalf = 0;
+  uhalf = 32;
+  vhalf = 320;
 }
 
 void printParams()
@@ -641,6 +672,10 @@ void printParams()
   printf("*** System Parameters ***\n");
   printf("netFile %s\n", netFile);
   printf("inputFile %s\n", inputFile);
+
+  printf("useHalf = %d\n", useHalf);
+  printf("uhalf = %d\n", uhalf);
+  printf("vhalf = %d\n", vhalf);
   printf("ulambda = %lf\n", ulambda);
   printf("vlambda = %lf\n", vlambda);
   printf("outputWid = %d\n", outputWid);
@@ -680,6 +715,9 @@ void copyVec(Real *wdest, Real *wsrc, int numWeights)
 /*************************** Version Log ****************************/
 /*
  * $Log: testnet.c,v $
+ * Revision 1.8  1995/12/08  00:18:00  stephene
+ * Inclusion of Rvec_correlate
+ *
  * Revision 1.7  1995/12/07  15:43:14  stephene
  * post nips sort out
  *
@@ -702,4 +740,3 @@ void copyVec(Real *wdest, Real *wsrc, int numWeights)
  * Initial revision
  *
  */
-

@@ -62,16 +62,22 @@ This will involve several functions:
 Things to do
 ------------
 
-* ? How many input vectors per epoch?
-
-* Write the function to determine the value of the merit function V/U
-
-* Calculate errors for each cell.
-
-* Write the derivative function that creates the derivative at a point.
-
 --
 
 Tue Nov 21 1995
 About to include the CG code and the function checker.
+
+
+Fri Dec  8 1995
+---------------
+
+Now have a simple version working POST Nips.  Correlation code
+included to see how well the program was doing.
+Two bugs in CG code meant that things werent working:
+
+	1.  #define FALSE was -1.0 instead of 0!
+	2.  #define JMAX was identical to JMIN, and so epsilon was
+	    always decreasing, regardless of the value of pi.  This
+	    is now fixed.
+
 

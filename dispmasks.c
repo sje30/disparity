@@ -8,13 +8,13 @@
 ***
 *** Created 20 Nov 95
 ***
-*** $Revision: 1.1 $
-*** $Date: 1995/11/20 14:43:28 $
+*** $Revision: 1.2 $
+*** $Date: 1995/11/21 23:32:29 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispmasks.c,v 1.1 1995/11/20 14:43:28 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispmasks.c,v 1.2 1995/11/21 23:32:29 stephene Exp stephene $";
 #endif
 
 
@@ -32,7 +32,7 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispmasks.c,v 1.1
 
 /* - Defines - */
 #define MASK1D 1	/* Should be 1 to indicate that ht of array is 1. */
-
+#define LN2 0.69314718  /* Natural log of 2 */
 
 
 /* - Function Declarations - */
@@ -253,9 +253,19 @@ void testMasks2()
 }
 
 
+double half2lambda(double half)
+{
+  /* Given the half life, calculate and return lambda. */
+  return (LN2 / half);
+}
+
+  
+
 void createMasks()
 {
-  /* Create the masks for the convolutions */
+  /* Create the masks for the convolutions  - these are one dimensional masks.
+   */
+  printf("Creating 1D masks\n");
   create1dExpMask(ulambda, &uMask);
   create1dExpMask(vlambda, &vMask);
 
@@ -268,6 +278,9 @@ void createMasks()
 void createMasks2()
 {
   /* Create the masks for the convolutions */
+  /* These are 2D masks */
+
+  printf("Creating 2D masks\n");
   create2dExpMask(ulambda, &uMask);
   create2dExpMask(vlambda, &vMask);
 
@@ -430,8 +443,10 @@ void testNormalisation()
 /*************************** Version Log ****************************/
 /*
  * $Log: dispmasks.c,v $
+ * Revision 1.2  1995/11/21  23:32:29  stephene
+ * About to include CG Code
+ *
  * Revision 1.1  1995/11/20  14:43:28  stephene
  * Initial revision
  *
  */
-
