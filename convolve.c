@@ -8,13 +8,13 @@
 ***
 *** Created 17 Nov 95
 ***
-*** $Revision: 1.2 $
-*** $Date: 1995/11/21 23:31:37 $
+*** $Revision: 1.3 $
+*** $Date: 1995/12/09 21:11:18 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/convolve.c,v 1.2 1995/11/21 23:31:37 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/convolve.c,v 1.3 1995/12/09 21:11:18 stephene Exp $";
 #endif
 
 
@@ -231,6 +231,9 @@ void double_convolve1d_wrap(Real *input, int inputWid,
 /*************************** Version Log ****************************/
 /*
  * $Log: convolve.c,v $
+ * Revision 1.3  1995/12/09  21:11:18  stephene
+ * commented out the printf statements in convolve 2d.
+ *
  * Revision 1.2  1995/11/21  23:31:37  stephene
  * About to include CG Code
  *

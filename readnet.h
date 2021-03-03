@@ -9,8 +9,8 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.2 $
-*** $Date: 1995/11/10 22:04:41 $
+*** $Revision: 1.3 $
+*** $Date: 1995/11/17 00:07:24 $
 ****************************************************************************/
 
 
@@ -35,6 +35,9 @@ void	printPreCellInfo();
 
 /*************************** Version Log ****************************/
 /* $Log: readnet.h,v $
+ * Revision 1.3  1995/11/17  00:07:24  stephene
+ * # daily update
+ *
  * Revision 1.2  1995/11/10  22:04:41  stephene
  * about to make a snapshot
  *

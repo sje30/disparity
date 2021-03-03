@@ -8,13 +8,13 @@
 ***
 *** Created 21 Nov 95
 ***
-*** $Revision: 1.5 $
-*** $Date: 1995/12/15 17:13:45 $
+*** $Revision: 1.6 $
+*** $Date: 1996/01/16 01:27:35 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/disperrors.c,v 1.5 1995/12/15 17:13:45 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/disperrors.c,v 1.6 1996/01/16 01:27:35 stephene Exp $";
 #endif
 
 
@@ -385,6 +385,10 @@ void createPartials()
 /*************************** Version Log ****************************/
 /*
  * $Log: disperrors.c,v $
+ * Revision 1.6  1996/01/16  01:27:35  stephene
+ * now have the code in place so that weight sharing can be done or left
+ * out.
+ *
  * Revision 1.5  1995/12/15  17:13:45  stephene
  * calcErrors modified so that it takes account of the activation
  * function for cells when taking the derivative of the function -

@@ -9,13 +9,13 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.10 $
-*** $Date: 1998/03/24 17:42:57 $
+*** $Revision: 1.11 $
+*** $Date: 1999/04/09 19:12:11 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /home/stephen/disparity/dispnet.c,v 1.10 1998/03/24 17:42:57 stephen Exp stephen $";
+static char *rcsid = "$Header: /home/stephen/disparity/dispnet.c,v 1.11 1999/04/09 19:12:11 stephen Exp $";
 #endif
 
 /* Main code file for the Disparity net. */

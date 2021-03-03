@@ -8,13 +8,13 @@
 ***
 *** Created 17 Nov 95
 ***
-*** $Revision: 1.2 $
-*** $Date: 1995/11/21 23:33:49 $
+*** $Revision: 1.3 $
+*** $Date: 1995/12/11 06:27:30 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testconvolve.c,v 1.2 1995/11/21 23:33:49 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/testconvolve.c,v 1.3 1995/12/11 06:27:30 stephene Exp $";
 #endif
 
 /* Simple functions to test the convolve function */
@@ -169,6 +169,9 @@ void printDoubleArray(FILE *stream, double *arr, int wid, int ht)
 /*************************** Version Log ****************************/
 /*
  * $Log: testconvolve.c,v $
+ * Revision 1.3  1995/12/11  06:27:30  stephene
+ * Copied printDoubleArray from mygen.c for portability
+ *
  * Revision 1.2  1995/11/21  23:33:49  stephene
  * About to include CG Code
  *

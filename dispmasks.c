@@ -8,13 +8,13 @@
 ***
 *** Created 20 Nov 95
 ***
-*** $Revision: 1.2 $
-*** $Date: 1995/11/21 23:32:29 $
+*** $Revision: 1.3 $
+*** $Date: 1995/12/09 16:41:53 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispmasks.c,v 1.2 1995/11/21 23:32:29 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispmasks.c,v 1.3 1995/12/09 16:41:53 stephene Exp $";
 #endif
 
 
@@ -443,6 +443,9 @@ void testNormalisation()
 /*************************** Version Log ****************************/
 /*
  * $Log: dispmasks.c,v $
+ * Revision 1.3  1995/12/09  16:41:53  stephene
+ * *** empty log message ***
+ *
  * Revision 1.2  1995/11/21  23:32:29  stephene
  * About to include CG Code
  *

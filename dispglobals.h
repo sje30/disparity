@@ -8,8 +8,8 @@
 ***
 *** Created 20 Nov 95
 ***
-*** $Revision$
-*** $Date$
+*** $Revision: 1.1 $
+*** $Date: 1995/12/14 21:19:50 $
 ****************************************************************************/
 
 /*
@@ -76,6 +76,9 @@ FILE	*opfp; /* Diagnostic file pointer for outputting various bits of info */
 
 
 /*************************** Version Log ****************************/
-/* $Log$
+/* $Log: dispglobals.h,v $
+ * Revision 1.1  1995/12/14  21:19:50  stephene
+ * Initial revision
+ *
  *
  */

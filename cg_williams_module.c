@@ -56,7 +56,7 @@
 #define RHO_MIN 0.25
 #define RHO_MAX 0.75
 
-#define VERBOSE_TRAINING TRUE /* sje mod to TRUE */
+#define VERBOSE_TRAINING FALSE /* sje mod to TRUE */
 
 
 #define SJE_SPATIAL		/* If this is defined, then some extra
@@ -492,13 +492,13 @@ eval*/
 ***
 *** Created 23 Nov 95
 ***
-*** $Revision: 1.5 $
-*** $Date: 1995/12/11 06:25:15 $
+*** $Revision: 1.6 $
+*** $Date: 1998/03/24 17:13:15 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /home/stephen/disparity/cg_williams_module.c,v 1.5 1995/12/11 06:25:15 stephene Exp stephen $";
+static char *rcsid = "$Header: /home/stephen/disparity/cg_williams_module.c,v 1.6 1998/03/24 17:13:15 stephen Exp stephen $";
 #endif
 
 
@@ -506,6 +506,9 @@ static char *rcsid = "$Header: /home/stephen/disparity/cg_williams_module.c,v 1.
 /*************************** Version Log ****************************/
 /*
  * $Log: cg_williams_module.c,v $
+ * Revision 1.6  1998/03/24 17:13:15  stephen
+ * Brief check in
+ *
  * Revision 1.5  1995/12/11 06:25:15  stephene
  *  put in #ifdef SJE_SPATIAL, to make things slighlty easier to run this code
  *  on other networks.

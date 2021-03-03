@@ -9,13 +9,13 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.13 $
-*** $Date: 1996/01/16 01:27:45 $
+*** $Revision: 1.14 $
+*** $Date: 1998/03/19 13:12:44 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsunx/home/stephene/disparity/testnet.c,v 1.13 1996/01/16 01:27:45 stephene Exp stephene $";
+static char *rcsid = "$Header: /home/stephen/disparity/testnet.c,v 1.14 1998/03/19 13:12:44 stephen Exp stephen $";
 #endif
 
 
@@ -76,7 +76,7 @@ normalmain(int argc, char *argv[])
   extern int	yylex();
   double u,v;
   double u1, v1;	/* u1 = 1.0/U and v1 = 1.0/V */
-
+  
 /*  testArrayDist();   exit(-1); */
   
   if (argc !=2 ) {
@@ -320,12 +320,17 @@ netmain(int argc, char *argv[])
   int		maxWtIndex;
   Real		tol = 1.0;
   int		maxLineSearches= 10;
+  char		tmpcmd[80];
   
   
   if (argc !=2 ) {
     printf("Usage %s <parameter file> \n", argv[0]);
     exit(-1);
   }
+
+  /* Take a copy of the param file. */
+  sprintf(tmpcmd, "cp %s .", argv[1]);
+  system(tmpcmd);
 
   setUpNetwork( argv[1]);
 
@@ -343,10 +348,10 @@ netmain(int argc, char *argv[])
   }
 
   /* Ok, we must want to do learning... */
-  opfp = fopen( "dispoutputs", "w");
+  opfp = fopen( "merit", "w");
   if (! opfp ) {
     printf("%s: %s could not be opened for writing",
-	   __FUNCTION__, "dispoutputs");
+	   __FUNCTION__, "merit");
     exit(-1);
   }
 
@@ -655,7 +660,7 @@ void evalPartials(Real *wts, Real *derivs)
   /*** Local Variables ***/
   int numWeights;
 
-  printf("eval partials\n");
+  /*printf("eval partials\n");*/
 
   /* return; */
 
@@ -973,49 +978,3 @@ void checkNetPerformance()
 
   
 }
-
-  
-/*************************** Version Log ****************************/
-/*
- * $Log: testnet.c,v $
- * Revision 1.13  1996/01/16  01:27:45  stephene
- * now have the code in place so that weight sharing can be done or left
- * out.
- *
- * Revision 1.12  1996/01/15  21:33:53  stephene
- * huh?
- *
- * Revision 1.11  1995/12/11  06:27:37  stephene
- * *** empty log message ***
- *
- * Revision 1.10  1995/12/10  17:55:45  stephene
- * Looking at 2d networks now.
- *
- * Revision 1.9  1995/12/09  16:42:01  stephene
- * *** empty log message ***
- *
- * Revision 1.8  1995/12/08  00:18:00  stephene
- * Inclusion of Rvec_correlate
- *
- * Revision 1.7  1995/12/07  15:43:14  stephene
- * post nips sort out
- *
- * Revision 1.6  1995/11/23  16:20:34  stephene
- * CG now installed
- *
- * Revision 1.5  1995/11/21  23:34:02  stephene
- * About to include CG Code
- *
- * Revision 1.4  1995/11/21  02:32:27  stephene
- * Update - moving towards a merit function
- *
- * Revision 1.3  1995/11/17  00:07:35  stephene
- * # daily update
- *
- * Revision 1.2  1995/11/10  22:05:10  stephene
- * about to make a snapshot
- *
- * Revision 1.1  1995/11/09  20:49:36  stephene
- * Initial revision
- *
- */

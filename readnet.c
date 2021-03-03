@@ -7,13 +7,13 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.11 $
-*** $Date: 1996/01/16 01:27:43 $
+*** $Revision: 1.12 $
+*** $Date: 1998/03/24 17:57:28 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsunx/home/stephene/disparity/readnet.c,v 1.11 1996/01/16 01:27:43 stephene Exp stephene $";
+static char *rcsid = "$Header: /home/stephen/disparity/readnet.c,v 1.12 1998/03/24 17:57:28 stephen Exp $";
 #endif
 
 

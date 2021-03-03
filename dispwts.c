@@ -9,13 +9,13 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.5 $
-*** $Date: 1995/12/13 04:04:47 $
+*** $Revision: 1.6 $
+*** $Date: 1996/01/16 01:27:42 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispwts.c,v 1.5 1995/12/13 04:04:47 stephene Exp stephene $";
+static char *rcsid = "$Header: /home/stephen/disparity/dispwts.c,v 1.6 1996/01/16 01:27:42 stephene Exp stephen $";
 #endif
 
 /********************************************************************/
@@ -24,6 +24,7 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispwts.c,v 1.5 1
   
 /* -  Include Files - */
 #include <stdio.h>
+#include <string.h>
 #include "rnd.h"
 #include "dispnet.h"
 #include "dispwts.h"
@@ -282,6 +283,10 @@ void printWtsInfo()
 /*************************** Version Log ****************************/
 /*
  * $Log: dispwts.c,v $
+ * Revision 1.6  1996/01/16 01:27:42  stephene
+ * now have the code in place so that weight sharing can be done or left
+ * out.
+ *
  * Revision 1.5  1995/12/13  04:04:47  stephene
  * Added new function void printWtsInfo() to create weight.info file.
  *

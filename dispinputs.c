@@ -9,13 +9,13 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.10 $
-*** $Date: 1998/03/19 13:04:46 $
+*** $Revision: 1.11 $
+*** $Date: 1998/03/24 17:43:10 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /home/stephen/disparity/dispinputs.c,v 1.10 1998/03/19 13:04:46 stephen Exp stephen $";
+static char *rcsid = "$Header: /home/stephen/disparity/dispinputs.c,v 1.11 1998/03/24 17:43:10 stephen Exp $";
 #endif
 
 /* Functions to provide the input to the disparity network */

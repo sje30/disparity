@@ -9,8 +9,8 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.1 $
-*** $Date: 1995/11/12 23:07:36 $
+*** $Revision: 1.2 $
+*** $Date: 1995/11/21 23:32:03 $
 ****************************************************************************/
 
 
@@ -34,6 +34,9 @@ void getNextInputVector(int vecnum);
 
 /*************************** Version Log ****************************/
 /* $Log: dispinputs.h,v $
+ * Revision 1.2  1995/11/21  23:32:03  stephene
+ * About to include CG Code
+ *
  * Revision 1.1  1995/11/12  23:07:36  stephene
  * Initial revision
  *

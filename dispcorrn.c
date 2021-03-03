@@ -8,13 +8,13 @@
 ***
 *** Created 17 Nov 95
 ***
-*** $Revision$
-*** $Date$
+*** $Revision: 1.1 $
+*** $Date: 1995/11/17 12:07:30 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header$";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/dispcorrn.c,v 1.1 1995/11/17 12:07:30 stephene Exp $";
 #endif
 
 
@@ -75,6 +75,9 @@ Rvec_correlate(Real *x, Real *y, int imin, int imax)
 
 /*************************** Version Log ****************************/
 /*
- * $Log$
+ * $Log: dispcorrn.c,v $
+ * Revision 1.1  1995/11/17  12:07:30  stephene
+ * Initial revision
+ *
  */
 

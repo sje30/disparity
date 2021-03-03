@@ -9,8 +9,8 @@
 ***
 *** Created 09 Nov 95
 ***
-*** $Revision: 1.10 $
-*** $Date: 1995/12/08 00:17:48 $
+*** $Revision: 1.11 $
+*** $Date: 1995/12/11 06:25:40 $
 ****************************************************************************/
 
 
@@ -267,6 +267,9 @@ layerInfo_t	*layerInfo;
 
 /*************************** Version Log ****************************/
 /* $Log: dispnet.h,v $
+ * Revision 1.11  1995/12/11  06:25:40  stephene
+ * *** empty log message ***
+ *
  * Revision 1.10  1995/12/08  00:17:48  stephene
  * Inclusion of Rvec_correlate
  *

@@ -7,8 +7,8 @@
 ###
 ### Created 09 Nov 95
 ###
-### $Revision: 1.7 $
-### $Date: 1995/12/11 06:27:10 $
+### $Revision: 1.8 $
+### $Date: 1995/12/14 21:42:36 $
 #############################################################################
 CC = gcc
 
@@ -17,7 +17,8 @@ CC = gcc
 
 #Place to look for libraries.
 #CLIBDIRS = -L$(HOME)/Clib
-OPTS = -msupersparc -O3
+#OPTS = -msupersparc -O3
+OPTS = -O3
 # Default rule for turning .c files into .o files uses the $CFLAGS 
 # So, to get make to include my library, just add the -I and -L paths
 # onto the CFLAGS
@@ -91,6 +92,9 @@ tags.testconvolve: testconvolve.c convolve.c
 ############################ Version Log #############################
 #
 # $Log: makefile,v $
+# Revision 1.8  1995/12/14 21:42:36  stephene
+# updated tags rule
+#
 # Revision 1.7  1995/12/11  06:27:10  stephene
 # testnet2 put in for checks.
 # Removed -lmygen and CLIBDIRS, CHEADERDIRS for portability

@@ -9,8 +9,8 @@
 ***
 *** Created 10 Nov 95
 ***
-*** $Revision: 1.9 $
-*** $Date: 1996/01/16 01:27:40 $
+*** $Revision: 1.10 $
+*** $Date: 1997/06/12 14:05:53 $
 ****************************************************************************/
 
 
@@ -117,11 +117,22 @@ int seed;			/* If non-zero, use this value as the seed.
 				 * Otherwise, clock used to set seed.
 				 * Default 0.
 				 */
+int normInput;			/* Non-zero if we want to normalize each
+				 * image-patch on way in. Default 0.
+				 */
+int noshifting;			/* Non-zero if we don't need to shift the
+				 * desired output values when computing
+				 * the correlation between actual and
+				 * desired output.
+				 */
 #endif
 
 
 /*************************** Version Log ****************************/
 /* $Log: dispvars.h,v $
+ * Revision 1.10  1997/06/12  14:05:53  stephene
+ * added seed for controlling random numbers.
+ *
  * Revision 1.9  1996/01/16  01:27:40  stephene
  * now have the code in place so that weight sharing can be done or left
  * out.

@@ -366,13 +366,13 @@ check_length(int imin, int imax)
 ***
 *** Created 23 Nov 95
 ***
-*** $Revision: 1.1 $
-*** $Date: 1995/11/23 16:30:22 $
+*** $Revision: 1.2 $
+*** $Date: 1995/12/08 00:16:23 $
 ****************************************************************************/
 
 
 #ifndef lint
-static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/bp_check_deriv.c,v 1.1 1995/11/23 16:30:22 stephene Exp stephene $";
+static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/bp_check_deriv.c,v 1.2 1995/12/08 00:16:23 stephene Exp $";
 #endif
 
 
@@ -394,6 +394,9 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/bp_check_deriv.c,
 /*************************** Version Log ****************************/
 /*
  * $Log: bp_check_deriv.c,v $
+ * Revision 1.2  1995/12/08  00:16:23  stephene
+ * *** empty log message ***
+ *
  * Revision 1.1  1995/11/23  16:30:22  stephene
  * Initial revision
  *

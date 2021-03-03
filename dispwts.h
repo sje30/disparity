@@ -9,8 +9,8 @@
 ***
 *** Created 12 Nov 95
 ***
-*** $Revision: 1.4 $
-*** $Date: 1995/12/11 06:26:33 $
+*** $Revision: 1.5 $
+*** $Date: 1995/12/13 04:05:05 $
 ****************************************************************************/
 
 
@@ -30,6 +30,9 @@ void printWtsInfo();
 
 /*************************** Version Log ****************************/
 /* $Log: dispwts.h,v $
+ * Revision 1.5  1995/12/13  04:05:05  stephene
+ * bew function void printWtsInfo()
+ *
  * Revision 1.4  1995/12/11  06:26:33  stephene
  * new function readWts created
  *
