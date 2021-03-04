@@ -19,6 +19,8 @@
 
 /* Header file for the disparity network */
 
+#define cfree(p) free((p))
+
 /* By default, we will be using doubles for weights and activations */
 typedef double Real;
 
