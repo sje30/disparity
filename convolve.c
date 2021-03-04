@@ -21,6 +21,7 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/convolve.c,v 1.3 
 
 /* -  Include Files - */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include "convolve.h"
 #include "dispnet.h"
