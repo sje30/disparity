@@ -25,6 +25,7 @@ static char *rcsid = "$Header: /rsuna/home2/stephene/disparity/disperrors.c,v 1.
 /* -  Include Files - */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include "dispnet.h"
 #include "disperrors.h"
