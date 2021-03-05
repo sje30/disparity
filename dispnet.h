@@ -251,10 +251,10 @@ double arrayDist(Array a1, Array a2);
 Real Rvec_correlate(Real *x, Real *y, int imin, int imax);
 
 /************************* Global Variables *************************/
-weightInfo_t	weightInfo;
-netInfo_t	netInfo;
-activationInfo_t actInfo;
-layerInfo_t	*layerInfo;
+extern weightInfo_t	weightInfo;
+extern netInfo_t	netInfo;
+extern activationInfo_t actInfo;
+extern layerInfo_t	*layerInfo;
 /************************* Global Variables *************************/
 
 
