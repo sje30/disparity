@@ -23,6 +23,7 @@ static char *rcsid = "$Header: /home/stephen/disparity/testnet.c,v 1.14 1998/03/
 
 /* -  Include Files - */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include "dispnet.h"
@@ -49,6 +50,168 @@ static void printParams();
 void checkNetPerformance();
 
 /* - Global Variables - */ 
+
+weightInfo_t	weightInfo;
+netInfo_t	netInfo;
+activationInfo_t actInfo;
+layerInfo_t	*layerInfo;
+
+
+ char netFile[100];		/* Name of the file that stores the network
+				 * structure information.
+				 * Default: default.net
+				 */
+ char inputFile[100];		/* Name of the file where inputs can
+				 * be read in from.
+				 */
+
+ double ulambda;			/* Lambda for short range mean U */
+ double vlambda;			/* Lambda for long range mean V */
+				/* The width of the means for U and V
+                                 * can either be set using lambda, or
+                                 * by providing the half lives
+                                 * directly. See useHalf. uhalf and vhalf. */
+
+
+ int outputWid; 			/* Width of the output cells. See also
+				 * outputHt. */
+
+ int outputHt;			/* Height of the output cells. For a
+				 * 1d arrangement of output cells,
+				 * this should be set to 1.  If this
+				 * value is not one, it is assumed
+				 * that the network is 2d.  */
+
+ int totalInputWid;		/* Total width of Jim's input files.
+				 * Default to 7000. */
+ int totalInputHt;		/* Total height of Jim's input files.
+				 * Default to 5. */
+ char  image1File[100]; 		/* File for left image */
+ char  image2File[100]; 		/* File for right image */
+ char  shiftsFile[100];		/* File for shifts data */
+ int numInputVectors;		/* number of input vectors to make
+				   from the total input files. */
+
+ int inputSkipX;			/* How many columns to skip between
+				 * successive input vectors. Default 2.
+				 */
+ int inputSkipY; 		/* How many rows to skip between input
+				 * vectors from a 2d image. Default 0.
+				 */
+
+ int inputHt; 			/* Height of each input vector from
+				   one image */
+ int inputWid; 			/* Width of each input vector from one im. */
+
+ int cgmax;			/* If non zero, then maximise merit
+				 * function in conjugate gradient
+				 * method. Default is 1.
+				 */
+ int checker;			/* Do we use conjugate gradient or
+				 * just check the derivatives?  Non
+				 * zero means that we check.
+				 * Default: 1.
+				 */
+
+ int maxiterations;		/* Maximum number of iterations for CG
+				 * to perform.  Default is 100. */
+
+ int useHalf;		        /* If nonzero, use uhalf and vhalf to
+				 * specify the half lives for U and
+				 * V.  Otherwise, use ulambda and
+				 * vlambda.  Default is 0. */
+ int uhalf, vhalf; 		/* Half lives of U and V. If useHalf
+				 * is non zero, then these values are
+				 * used to specify the size of U and
+				 * V. */
+
+ char  initWts[100];		/* Name of file storing the initial
+				 * weights of the network if any.  If
+				 * value = "none" (default value),
+				 * then rnd initial weights are
+				 * created. */
+
+ char  results[100];		/* Where to put the results of
+				 * checking the nets
+				 * performanace. Default "results". */
+
+
+ int doLearning;			/* If non zero (default), then do
+				 * learning. Otherwise, just read in
+				 * initial weights and run input
+				 * images through the network, and
+				 * calculate the correlation. */
+
+ int oneImage;			/* Do we want to read in one image or two?
+				 * Default 0 - means we have more than one
+				 * image file. */
+ int compcorrn;			/* Do we want to compute correlation?
+				 * If non zero, correlation is computed.
+				 * Default: 1*/
+ int usegnuplot;			/* Should we use gnuplot to display
+				 * network activity? If non zero, then
+				 * use gnuplot. Default: 0.  */
+ int seed;			/* If non-zero, use this value as the seed.
+				 * Otherwise, clock used to set seed.
+				 * Default 0.
+				 */
+ int normInput;			/* Non-zero if we want to normalize each
+				 * image-patch on way in. Default 0.
+				 */
+ int noshifting;			/* Non-zero if we don't need to shift the
+				 * desired output values when computing
+				 * the correlation between actual and
+				 * desired output.
+				 */
+
+Mask uMask, uMaskD;	/* Short Range Mask and its version for derivatives. */
+Mask vMask, vMaskD;	/* Long Range Mask and derivative version. */
+
+Array shifts; /* Stores the shifts array. */
+Array inputs; /* Store the input vectors to the network */
+
+allActns_t allActns;	/* Activation info stored for each input
+			 * vector
+			 */
+
+/* 
+ * z is the array of output values, arranged in either a 1d or 2d set up.
+ * ztilde is the corresponding array of short range values, and 
+ * zbar is the long range average values.
+ *
+ * ztildeminz, zbarminz are useful auxiliary variables.
+ * ztildeminz[i] = ztilde[i] - z[i]. (useful for computing wt change vec)
+ */	
+
+Array z, zbar, ztilde;
+Array ztildeminz, zbarminz;
+
+
+/*
+ * See maths section Computing dU/dx_a
+ *
+ *dudx[a] = du/dx_a =  partial diff of U with respect to
+ *		       activation of output unit x 
+ *dvdx[a] = dv/dx_a =  partial diff of V ...
+ *
+ * da[i]  = 1/V dv/dx_a - 1/U du/dx_a = \delta_a
+ *
+ * Hence da is the array of delta's for the top layer of cells.
+ *
+ */
+
+Array		dudx, dvdx, da;
+
+
+/* dw[i] = weight change for weight i, over all input vectors.
+ * onedw[i] = weight change for weight i, given just one input vector.
+ */
+Array dw; /* Stores the partials for each weight, summed over all inputs */
+Array onedw; /* Partials for just one input vector. */
+
+
+
+FILE	*opfp; /* Diagnostic file pointer for outputting various bits of info */
 
 
 
@@ -101,8 +264,8 @@ normalmain(int argc, char *argv[])
   /* Check that the size of the input vectors and the number of input
    *  cells is the same. */
   if ( layerInfo[0].ncells != inputs.wid) {
-    printf("%s: Error - number of cells in input layer (%d) does not match
-the dimensionality of the input vectors (%d)\n",
+    printf("%s: Error - number of cells in input layer (%d) does not match"
+	   "the dimensionality of the input vectors (%d)\n",
 	   __FUNCTION__, layerInfo[0].ncells, inputs.wid);
     exit(-1);
   }
@@ -260,8 +423,8 @@ void setUpNetwork(char *paramFile)
   /* Check that the size of the input vectors and the number of input
    *  cells is the same. */
   if ( layerInfo[0].ncells != inputs.wid) {
-    printf("%s: Error - number of cells in input layer (%d) does not match
-the dimensionality of the input vectors (%d)\n",
+    printf("%s: Error - number of cells in input layer (%d) does not match"
+	   "the dimensionality of the input vectors (%d)\n",
 	   __FUNCTION__, layerInfo[0].ncells, inputs.wid);
     exit(-1);
   }
@@ -711,8 +874,9 @@ void checkNetSize()
 
   
   if ( z.ht % opht ) {
-    printf("%s: error - z.ht (%d)  must be exactly divisible by oplayer.ht (%d)
-\n", __FUNCTION__, z.ht, opht);
+    printf("%s: error - z.ht (%d)  must be exactly divisible "
+	   "by oplayer.ht (%d)\n",
+	   __FUNCTION__, z.ht, opht);
     exit(-1);
   }
   
