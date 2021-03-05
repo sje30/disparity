@@ -23,13 +23,13 @@
 
 #include "dispnet.h"
 
-Mask uMask, uMaskD;	/* Short Range Mask and its version for derivatives. */
-Mask vMask, vMaskD;	/* Long Range Mask and derivative version. */
+extern Mask uMask, uMaskD;	/* Short Range Mask and its version for derivatives. */
+extern Mask vMask, vMaskD;	/* Long Range Mask and derivative version. */
 
-Array shifts; /* Stores the shifts array. */
-Array inputs; /* Store the input vectors to the network */
+extern Array shifts; /* Stores the shifts array. */
+extern Array inputs; /* Store the input vectors to the network */
 
-allActns_t allActns;	/* Activation info stored for each input
+extern allActns_t allActns;	/* Activation info stored for each input
 			 * vector
 			 */
 
@@ -42,8 +42,8 @@ allActns_t allActns;	/* Activation info stored for each input
  * ztildeminz[i] = ztilde[i] - z[i]. (useful for computing wt change vec)
  */	
 
-Array z, zbar, ztilde;
-Array ztildeminz, zbarminz;
+extern Array z, zbar, ztilde;
+extern Array ztildeminz, zbarminz;
 
 
 /*
@@ -59,18 +59,18 @@ Array ztildeminz, zbarminz;
  *
  */
 
-Array		dudx, dvdx, da;
+extern Array		dudx, dvdx, da;
 
 
 /* dw[i] = weight change for weight i, over all input vectors.
  * onedw[i] = weight change for weight i, given just one input vector.
  */
-Array dw; /* Stores the partials for each weight, summed over all inputs */
-Array onedw; /* Partials for just one input vector. */
+extern Array dw; /* Stores the partials for each weight, summed over all inputs */
+extern Array onedw; /* Partials for just one input vector. */
 
 
 
-FILE	*opfp; /* Diagnostic file pointer for outputting various bits of info */
+extern FILE	*opfp; /* Diagnostic file pointer for outputting various bits of info */
 
 #endif
 
