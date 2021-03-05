@@ -22,13 +22,14 @@ OPTS = -O3
 # Default rule for turning .c files into .o files uses the $CFLAGS 
 # So, to get make to include my library, just add the -I and -L paths
 # onto the CFLAGS
-CFLAGS = -ansi -gstabs -g $(OPTS) $(CHEADERS) $(CLIBDIRS)
+##CFLAGS = -ansi -gstabs -g $(OPTS) $(CHEADERS) $(CLIBDIRS)
+CFLAGS = -ansi -g
 
 
 # By default the executable testnet will be placed into the file
 # ~/bin/testnet
 
-testnet : testnet.o readnet.o readnet.h dispscan.o dispinputs.o \
+testnet0 : testnet.o readnet.o readnet.h dispscan.o dispinputs.o \
 	 dispnet.o dispwts.o dispmasks.o  convolve.o testconvolve.o \
 	disperrors.o cg_williams_module.o bp_check_deriv.o
 	$(LINK.c) $(OPTS) -o $(HOME)/bin/testnet \
@@ -37,6 +38,14 @@ testnet : testnet.o readnet.o readnet.h dispscan.o dispinputs.o \
 	disperrors.o cg_williams_module.o bp_check_deriv.o \
 	-lm  $(CHEADERS) $(CLIBDIRS)
 
+SRC = testnet.c readnet.c dispscan.c dispinputs.c dispnet.c dispwts.c dispmasks.c  \
+      convolve.c testconvolve.c disperrors.c cg_williams_module.c bp_check_deriv.c
+
+
+OBJ = $(SRC:.c=.o)
+
+testnet : $(SRC)
+	gcc -o testnet $(SRC)  -lm  $(CHEADERS) $(CLIBDIRS)
 
 # testnet2 is same as testnet, it just allows me to create new
 # executable while a program is still running.
