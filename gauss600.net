@@ -1,0 +1,27 @@
+# Simple 3 layer network
+# Mon Dec 11 1995
+
+# $file ~/disparity/gauss600.net$
+# $date December 12, 1995$
+
+# Number of layers
+nLayers 3
+
+# Number of cells in each layer (excluding bias)
+layer 0 3 6
+layer 1 1 5
+layer 2 1 1
+
+# Layer information
+
+layer 0 LINEAR bias
+layer 1 TANH nobias
+layer 2 LINEAR nobias
+
+# Connectivity
+connections to layer 1
+full
+connections to layer 2
+full
+
+
