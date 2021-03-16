@@ -1,0 +1,798 @@
+% Title:  disptr - disparity tech report
+%
+% Doc: /rsuna/home2/stephene/disparity/disptr.tex
+% Original Author:     Stephen Eglen <stephene@cogs.susx.ac.uk>
+% Created:             Wed Jan 10 1996
+%
+
+
+\documentclass[a4paper]{article}
+\usepackage{alltt,theapa,egg,pstimes,a4wide,amstex,mathptm}
+
+\usepackage[]{graphicx}
+%\usepackage[draft]{graphicx}
+
+\newcommand{\zbar}{\bar{z}}
+\newcommand{\ztilde}{\tilde{z}}
+\newcommand{\lkernel}{\bar{\Phi}}
+\newcommand{\skernel}{\tilde{\Phi}}
+\newcommand{\dskernel}{\tilde{\Phi'}}
+\newcommand{\dlkernel}{\bar{\Phi'}}
+\newcommand{\sussex}{ {$^\ast$}}
+\newcommand{\sheffield}{ {$^\dagger$}}
+\newcommand{\pdiff}[2]{ \frac{\partial #1}{\partial #2}}
+
+\graphicspath{{/rsunq/vision/stephene/disppics/}{ps/}}
+
+\begin{document}
+
+\title{Learning Perceptual Invariances: A Spatial Model}
+
+%\! = negative thin space
+\author{Stephen Eglen\!\sussex, Jim Stone\!\sheffield, Harry
+  Barrow\!\sussex\\
+\\
+\sussex School of Cognitive and Computing Sciences,\\
+University of Sussex,\\
+Brighton BN1 9QH, England.\\
+stephene,harryb@@cogs.susx.ac.uk \\
+\\
+\sheffield AI Vision Research Unit, Psychology Building,\\
+Sheffield University, Western Bank,\\
+Sheffield, S10 2TN, England.\\
+stone@@aivru.sheffield.ac.uk\\
+\\
+Cognitive Science Research Paper 404}
+
+
+
+\date{January 1996}
+
+\maketitle
+
+\begin{abstract}
+  
+  A novel unsupervised learning method for extracting spatio-temporal
+  invariances has been developed in \cite{stone95b}.  The learning
+  method works by trying to jointly minimise the short term variance of a
+  unit's output, whilst maximising the long term variance of the output. 
+  The learning method has been applied to extracting disparity from a
+  temporal sequence of random dot stereograms.
+
+  This paper reports on developing and applying the learning method to
+  a spatial task, both in one and two dimensions.  Random dot
+  stereograms were used as input to a three layer feedforward network.
+  After learning, output units in the network became selective for
+  disparity.  This confirms the usefulness of the learning method, and
+  leads the way to creating a full spatio-temporal model, using both
+  temporal and spatial information.
+
+\end{abstract}
+
+\section{Introduction}
+
+An unsupervised learning method of extracting perceptual invariances
+from a sequence of images has been developed in \cite{stone95b}.
+  The method rests on the assumption that whilst pixel
+values over a patch of image can change quite rapidly, the underlying
+parameters (such as depth or disparity) usually vary smoothly.
+\citeA{stone95} have also applied the learning method to the problem
+of converting a place coding amongst a group of units into a value
+coding from one unit.
+
+
+For a unit to be selective to one of these underlying perceptual
+invariances, such as depth, we should expect that its output will
+change smoothly over time in accordance with the invariance.  Hence,
+the unit should have a low short term temporal variance.  However, the
+unit can have a very low short term temporal variance (zero) if its
+output is always the same, regardless of its input.  Hence, another
+constraint that can be placed on the unit is that it should have a
+large long term variance: over a long period of time, the unit's
+output should vary quite a lot.  The learning method presented in
+\cite{stone95b} puts both these constraints into one measure F:
+
+\begin{align*}
+F &= \log \frac{V}{U}
+\end{align*}
+
+
+where $V$ is the long term variance of the unit, and $U$ is the short
+term variance.  By maximising $F$, we will jointly maximise the long
+term variance of the unit's output and minimise its short term
+variance.  (The $\log$ function is used so that the derivative of $F$ is
+easy to compute - see Appendix \ref{sec:learningruleapp}.)
+
+This learning method was used by Stone in a feedforward network
+presented with a sequence of one dimensional random dot stereograms.
+Each input was a pair of random dot stereograms, with the disparity
+between the two images varying in a sinusoidal fashion over time.  The
+learning method was used to maximise F for the one output unit.  After
+learning, the output of the network was highly correlated ($r
+> 0.97$) with the disparity between the images.
+
+The work presented here uses the same learning method to a similar
+problem in the spatial domain.  Rather than having a sequence of
+images presented to the network over time, we have one large image
+where the disparity varies smoothly over the image.  Additionally,
+instead of having one output unit, we now have an array of output
+units, and the learning rule is now applied to maximise $F$ over all of
+the output units.
+
+For brevity, the temporal model described by \cite{stone95b} will be
+called the `temporal model', whereas the model presented here will be
+called the `spatial model'.
+
+
+
+\subsection{Related Work}
+
+The spatial task used here is the same as the task used in
+\cite{beckerthesis}. Using the IMAX method, Becker showed how
+maximising the mutual information between units of adjacent networks
+could be used to learn stereo disparity. However, using an
+architecture similar to that described here, pre-learning of the
+hidden layer was required in order for the system to learn disparity.
+This pre-learning consisted of maximising the mutual information
+between corresponding hidden layer units in adjacent networks.
+Maximising mutual information between output units {\em without
+  pre-learning} was effective only if the hidden layer of each network
+was treated as a number of distinct clusters, with weight sharing
+between corresponding clusters in different networks. The need for
+these added constraints suggest that the merit function used in IMAX
+may not be best suited to extracting disparity.
+
+\section{Method}
+
+
+\subsection{Inputs}
+
+
+Two large random dot stereograms were created, such that the disparity
+varied smoothly (either sinusoidally or in a gaussian manner) over the
+image.  The images were also blurred with a gaussian filter, and
+normalised to have zero mean and unit variance.  Both one and two
+dimensional images were created, and are described in more detail later.
+
+\subsection{Network Architecture}
+
+A three layer fully connected feedforward network was created, similar to
+the one used in the temporal model.  To simplify the task, a shared
+weight system was used, as shown in Figure \ref{fig:temporalmodel}.
+The actual size of the shared network varied in experiments, but there
+was always just one output unit from the shared network.  The number
+of output units in the virtual array was the same as the number of
+pairs of image patches.
+
+The two input images were broken up into non overlapping patches.
+Matching patches from each image were copied into the input layer of
+the network, and the activity propagated to the output layer of the
+shared network.  The output of the shared network was then copied into
+the appropriate part of the array of virtual output units.
+
+For example, let the two input images be $500 \times 1$ pixels, and
+the input layer contain $5 \times 2$ input units.  Both input images
+are therefore broken up into 100 patches of size $5 \times 1$.  Patch
+$n$ from both eyes is presented together as input to the network.  The
+network computes the output of the network, and this output is then
+copied into unit $n$ of the array of virtual output units.  This
+procedure is repeated for all 100 patches, and corresponds to the
+network being swept across the two large images.
+
+\begin{figure}[htbp]
+  \begin{center}
+    \leavevmode
+    \includegraphics[width=6in]{temporalmodel.ps}
+    \caption{Architecture of the shared network.  In this example
+      configuration, the two images are broken down into 5 patches,
+      and currently patch two is being presented to the network.
+      The output of the shared network is then copied into the second
+      virtual output unit.}
+    \label{fig:temporalmodel}
+  \end{center}
+\end{figure}
+
+\subsubsection{Network Configurations}
+
+Two main configurations were used in this work: one dimensional and
+two dimensional.  In the one dimensional configuration, input images
+were one dimensional and the virtual output units were arranged in a
+one dimensional array.  In the two dimensional configuration, we used
+two dimensional input images and the virtual output units were
+arranged into a two dimensional array.  The one dimensional version
+corresponds to a spatial analogy of the temporal learning task,
+whereas the two dimensional version is a novel extension.
+
+
+In both configurations, units in each layer were fully connected to
+units in the next layer.  Additionally, hidden layer units received an
+extra bias input.  Input and output units used the identity transfer
+function for calculating the output of units, whereas the hidden units
+used a $\tanh$ transfer function.  Appendix \ref{sec:activation} gives
+the equations describing network activity.
+
+\subsection{Learning Rule}
+
+
+The temporal model learning rule has been slightly adapted for the
+spatial model, although it essentially remains the same.  In the
+temporal model,there is one output unit.  The long term variance ($V$)
+and the short term variance ($U$) of the unit is measured as:
+        
+\begin{align*}
+  V &= \frac{1}{2} \sum_{t=1}^{T} ( \zbar_t - z)^2 \\
+  U &= \frac{1}{2} \sum_{t=1}^{T} ( \ztilde_t - z)^2
+\end{align*}
+
+where $z$ is the output of the unit, $\zbar$ is the long term weighted
+average of the output unit, and $\ztilde$ is the short term weighted
+average of the output unit.
+
+In this model, there is no temporal component, but instead there is an
+array of output units.  Hence, the long and short  term variances are
+measured as the long and short range spatial variances:
+
+\begin{align*}
+V & = \frac{1}{2} \sum_k ( \zbar_k - z_k ) ^2 \\
+U & = \frac{1}{2} \sum_k ( \ztilde_k - z_k ) ^2 
+\end{align*}
+
+where $k$ ranges over all output units in the virtual output array.
+$\zbar_k$ and $\ztilde_k$ now represent the long and short range
+spatial variance of virtual output unit $k$.  Therefore, the only
+differences in the spatial learning rule and the temporal learning
+rule is the way in which $U$ and $V$ are calculated, and in turn, the
+way in which the short and long term weighted averages are calculated.
+(Appendix \ref{sec:merit} show how $U$ and $V$ are calculated.)
+
+\subsubsection{Learning Paradigm}
+
+Conjugate gradient descent \cite{williams91} was used to maximised $F$
+with respect to each weight in the network.  Each line search of the
+conjugate gradient required evaluation of $F$ and $\pdiff{F}{w}$
+at several points in the weight space.  After each epoch
+(defined here as one iteration of conjugate gradient descent), the
+correlation between network outputs and disparity was computed.
+Learning typically continued until the values of $F$ and $r$
+stabilised.  Full details of computing $F$ and $\pdiff{F}{w}$ are
+given in  Appendix \ref{sec:learningruleapp}.
+
+It is worth noting that this is an unsupervised learning method. The
+known disparity between input images is never used by the learning
+algorithm -- we only use it for computing the correlation between the
+network output and disparity.
+
+
+
+\subsection{Free Parameters}
+
+The only free parameters of the model needed were those controlling
+the extent of spatial averaging for computing $\zbar$ and $\ztilde$.
+In this model, we used exponentially weighted kernels to compute these
+terms (see Appendix \ref{sec:masks}), and so the kernel half lives
+(denoted by $h_u$ and $h_v$) controlled the extent of spatial averaging.
+The results from the temporal model indicated that the half life $h_v$
+should be large enough such that $\zbar$ was a good approximation to
+the mean value of all of the outputs, whereas $h_u$ should be set so that
+$\ztilde$ is averaging amongst something like ten percent of the output
+units.  The size of the network was initially chosen to be similar to
+the network used in the temporal model -- ten input units (five units
+for each image), between three and ten hidden units and one output
+unit.
+
+
+\subsection{Testing Network Performance}
+
+After learning, the weights were then frozen so that the network could
+be tested on other images not seen during learning.  To do this, the
+new images were cut up into patches of the same size as those used
+during learning and presented to the shared network one at a time.
+The correlation $r$ between the output of the network and the known
+disparity for the image patches was then measured.  (The size of the
+test images did not need to be the same size as the images used in
+learning, since the virtual array is not used during testing.)
+
+
+\section{Results}
+
+
+Two sets of experiments were performed.  The first set of experiments
+used one dimensional input images with the virtual array of output units
+arranged in a one dimensional array.  The one dimensional
+configuration therefore was a spatial analogy of the temporal learning
+task described by \cite{stone95b}.  The second set of experiments used
+two dimensional input images with the virtual array of output units
+arranged in a (square) grid, and were the more interesting because of
+the extra dimension involved.
+
+\subsection{One Dimensional Network}
+
+Two input images of size $5000 \times 1$ pixels were generated to make
+$1000$ pairs of $5 \times 1$ image patches.  The disparity between a
+pair of image patches was set to some value between $\pm 1$, which
+varied sinusoidally with a period of 1000 over the 1000 patches.
+These image patches were presented to a network with 10 ($2 \times 5
+\times 1$) input units, 10 hidden units and one output unit.  The half
+lives were set in accordance with the half lives used in the temporal
+model: $h_u$ was 32 and $h_v$ was 3200.  The virtual output array used
+here was a circular 1D array of 1000 output units.
+
+
+Figure \ref{fig:1dtrain} shows the results after learning for
+160 epochs.  The final correlation between disparity and network
+output reached $0.937$.  Figure \ref{fig:1doutputevolution} shows how
+the network output developed during learning.
+
+After learning, the network was then tested on two random dot
+stereogram images of size $1000 \times 1 $, where this time the
+disparity varied sinusoidally between $\pm 1$ with a period of 40.
+As seen from Figure \ref{fig:1dtest}, the network generalised well to
+this image pair, producing a correlation of $0.940$ between disparity
+and output.
+
+
+
+Similar experiments were performed, using inputs whose disparity
+varied sinusoidally with periods much less than 1000 for learning.  In
+these experiments, the network would produce outputs highly correlated
+with disparity, but only if the short term half life, $h_u$ was
+considerably reduced.  For example, when the network was using the
+data set whose disparity varied sinusoidally over a period of only 40
+patches as input during learning, the half life $h_u$ had to be
+reduced to either 2 or 3 for the network to learn the disparity.  One
+side effect, as noted by Stone was that reducing the short range half
+life increased the learning time \cite<see Figure 4 of>{stone94}.
+
+
+\begin{figure}[htbp]
+  \begin{center}
+    %\leavevmode
+
+    \includegraphics[width=7cm,angle=270]{sin1000.ps}
+    \includegraphics[width=7cm,angle=270]{sin1000trainop.ps}
+    \includegraphics[width=7cm,angle=270]{sin1000measures.ps}
+
+    \caption{Results of the 1D network learning with  the 1d random dot
+      stereograms, where the disparity varied sinusoidally between
+      $\pm 1$ with a period of 1000 over the 1000 image patches.
+      Top:  Disparity values for the 1000 pairs of image
+      patches used during learning.  Center: Output from the network
+      after learning. Bottom:  Plot of correlation and merit function
+      during learning.}
+    \label{fig:1dtrain}
+  \end{center}
+\end{figure}
+
+\begin{figure}[htbp]
+  \begin{center}
+    \leavevmode
+
+    \begin{tabular}{cc}
+
+
+      \includegraphics[width=5cm,angle=270]{1dmontage.0.ps} &
+      \includegraphics[width=5cm,angle=270]{1dmontage.10.ps} \\
+
+      \includegraphics[width=5cm,angle=270]{1dmontage.20.ps} &
+      \includegraphics[width=5cm,angle=270]{1dmontage.50.ps} \\
+
+      \includegraphics[width=5cm,angle=270]{1dmontage.100.ps} &
+      \includegraphics[width=5cm,angle=270]{1dmontage.150.ps}
+
+    \end{tabular}
+    \caption{Development of network output during learning, using
+      the 1D data described in Figure \protect \ref{fig:1dtrain}.
+      Network outputs are shown left to right and top to bottom after
+      0, 10, 20, 50, 100 and 150 epochs.}
+    \label{fig:1doutputevolution}
+  \end{center}
+\end{figure}
+
+
+\begin{figure}[htbp]
+  \begin{center}
+    \leavevmode
+    \includegraphics[width=7cm,angle=270]{sin200.ps}
+    \includegraphics[width=7cm,angle=270]{sin200results.ps}
+    \caption{Results of testing the 1D network on 200 image patches
+      unseen during learning.  Input image patches were taken from a
+      pair of random dot stereograms with disparity varying
+      sinusoidally between $\pm 1$ over a period of 40 patches.
+      Top:  Disparity values for the 200 pairs of image
+      patches used for testing.  Bottom: Output from the network.}
+    \label{fig:1dtest}
+  \end{center}
+\end{figure}
+
+
+
+\clearpage
+\subsection{Two Dimensional Network}
+
+A pair of random dot stereograms of size $120 \times 120$ pixels were
+created, such that the disparity between patches of the images was a
+gaussian function of the distance of the patch from the centre of the
+image (see Figure \ref{fig:2dtrain}).  These two images were then
+broken down into $3 \times 3$ non overlapping image patches.  The
+shared network had $18\ ( 2 \times 3 \times 3)$ input units, 5 hidden
+units, and 1 output unit, feeding into a virtual array of $1600\ (40
+\times 40)$ output units.  Figure \ref{fig:2dtrain} shows the network
+output after 1000 epochs, along with a plot of the merit function and
+correlation during learning.  Figure \ref{fig:2d.gauss600.montage}
+shows how the outputs develop during learning.  As can be seen from
+Figures \ref{fig:2dtrain} and \ref{fig:2d.gauss600.montage}, the
+network has essentially learnt the disparity after 200 epochs, and the
+remaining 800 epochs are spent gradually improving the merit function.
+
+
+(Note: The array of $40 \times 40$ disparity values and $40 \times 40$
+output values are visualised as $40 \times 40$ greyscale images, with
+each disparity or output value represented by the pixel intensity: the
+larger the value, the brighter the pixel.)
+
+
+\subsubsection{Testing Network Performance}
+
+After learning, the weights were frozen and the network tested on
+a new random dot stereogram pair, where the disparity varied
+sinusoidally between $\pm 1$ independently in both the horizontal and
+vertical directions of the images, as shown in Figure
+\ref{fig:2dtest}. $2500\ (50 \times 50)$ pairs of image patches were
+extracted from this new image pair and presented to the network.  The
+correlation between network output (shown in Figure \ref{fig:2dtest})
+and disparity was $0.890$.
+
+
+\begin{figure}[htbp]
+  \begin{center}
+
+    \begin{tabular}{cc}
+    \includegraphics[width=5cm]{gauss600.left.ps} &
+    \includegraphics[width=5cm]{gauss600.right.ps}\\
+    \includegraphics[width=5cm]{gauss600.disp.ps} &
+    \includegraphics[width=5cm]{gauss600.op.ps}
+
+    \end{tabular}
+    \includegraphics[width=7cm,angle=270]{gauss600.measures.ps}
+    \caption{Results of the 2D network learning, using as input a  random dot
+      stereogram pair where the disparity between image patches
+      decreased in a gaussian manner from the centre of the image.
+      Top row: pair of random dot stereograms, used as input to the
+      network.  Centre left: Disparity between the two input
+      images.  Centre right: Output from the network after 1000 epochs
+      of learning. Bottom: Plot of correlation and merit function
+      as a function of learning time.}
+    \label{fig:2dtrain}
+  \end{center}
+\end{figure}
+
+\begin{figure}[htbp]
+  \begin{center}
+    \leavevmode
+    \includegraphics[width=15cm]{gauss600.montage.ps}
+    \caption{Evolution of the outputs during learning for the 2D
+      network, using the data set presented in Figure \protect
+      \ref{fig:2dtrain} as input.  The images, from left to right and top to
+      bottom show network outputs after 0, 10, 20, 30, 40, 50, 60, 70,
+      80, 90, 100, 110, 120, 130, 140, 150, 160, 170,180, 190, 200,
+      400, 500, 750 and 1000 epochs.}
+    \label{fig:2d.gauss600.montage}
+  \end{center}
+\end{figure}
+
+
+
+
+
+\begin{figure}[htbp]
+  \begin{center}
+    \leavevmode
+    \includegraphics[width=7cm]{sin200.shifts.ps}
+    \includegraphics[width=7cm]{eggresults.dat.ps}
+    \caption{Results of testing the 2D network on a novel image
+      pair. Left: Array of disparity values between the novel image
+      pair.  Right: Array of network outputs.  The correlation between
+      the disparity and the output is $0.890$.}
+    \label{fig:2dtest}
+  \end{center}
+\end{figure}
+
+
+
+\subsubsection{Hidden Units}
+
+We have not yet considered in detail the role of the hidden units.  In
+some preliminary experiments, we modified the number of input units
+and hidden units in the network.  Results from three of these networks
+are presented for comparison in Table \ref{tab:differentnetsizes}.
+Clearly, the network with the most hidden units (15) performed the
+best when the 2D gaussian disparity images were used as inputs during
+learning.  It also produced the best correlation on the test data (the
+2D sinusoidal disparity images).  However, much more work needs to be
+done looking at the hidden units, including looking at their receptive
+fields, to understand the role of the hidden units.
+
+
+%% Note: the correlation values on the eggbox data were generated usin
+%% checkegg.2.prm and checkegg.3.prm
+
+\begin{table}[htbp]
+  \begin{center}
+    \leavevmode
+    \begin{tabular}{c|cc|c}
+       & \multicolumn{2}{c|}{After Learning} & Testing \\
+      Network Size (Input:Hidden:Output) &  Merit function &
+       Correlation &  Correlation\\ \hline
+      ($2 \times 3\times3):5:1 $& -1.725 & 0.923   & 0.890\\
+      ($2 \times 5\times5):3:1 $& -1.267 & 0.864   & 0.785\\
+      ($2 \times 5\times5):15:1$& -2.982 & -0.972  & -0.908
+    \end{tabular}
+    \caption{Comparison of different network sizes.  The 2D gaussian
+      data was used during learning, and the 2D sinusoidal data for testing.}
+    \label{tab:differentnetsizes}
+  \end{center}
+\end{table}
+
+\clearpage
+
+
+\section{Conclusions}
+
+We have shown that the unsupervised learning model presented by
+\cite{stone95} can be used in the spatial domain to learn disparity,
+in both one and two dimensions. This confirms the usefulness of the
+learning method.
+
+This work can be developed in several directions.  Firstly, it could be
+extended to be a non weight sharing network.  This is a harder learning
+task than the shared network presented here, and will probably mean
+that more image patches will need presenting to the network.  However,
+we expect that a non shared network should produce similar results to
+the ones presented here.
+
+However, a more significant direction for this work is to apply the
+learning method to a full spatiotemporal task.  This would effectively
+combine the temporal learning rule used in the temporal model and the
+spatial learning rule presented here.  Input to the network would be a
+sequence of images.  After presenting one input (or pairs of images in
+a stereo task) to the whole network, the spatial learning rule could
+be applied to the array of output units.  Simultaneously, the temporal
+learning rule could be applied separately to each output unit.  This
+would produce two error vectors for maximising the merit function with
+respect to the network weights.
+
+
+%\subsubsection{Acknowledgements}
+
+%Jim Stone, David Willshaw, Harry, Ali.
+
+\appendix
+
+\section{Mathematical Details of the Model and Learning Rule}
+\label{sec:learningruleapp}
+This appendix provides the necessary mathematical details of the
+model.
+
+\label{maths.app}
+
+\subsection{Notation}
+
+\begin{center}
+  
+
+\begin{tabular}{cp{8cm}}
+  Term & Meaning \\ \hline
+  $x$ & total input to a unit \\
+  $z$ & Output of a unit \\
+  $\zbar$ & Long range weighted average of $z$ \\
+  $\ztilde$ & Short range weighted average of $z$ \\
+  $i$ & Subscript for input units \\
+  $j$ & Subscript for hidden units \\
+  $w_{ij}$ & Weight from  input unit $i$ to hidden layer unit $j$\\
+  $w_{jk}$ & Weight from  hidden layer unit $j$ to output layer unit
+  $k$\\
+  $\Delta w_{ij}$ & Weight change from unit $i$ to unit $j$ \\
+  $\theta_j$ & Bias weight to hidden unit $j$ \\
+  $a,b,k$ & Subscript for output units \\
+  $\skernel$ & Short range kernel for convolution to form $\ztilde$\\
+  $\lkernel$ & Long range kernel for convolution to form $\zbar$\\
+  $h_u$, $h_v$ & Short and long range half lives for convolution kernels\\
+
+\end{tabular}
+\end{center}
+
+
+\subsection{Calculating Network Activation}
+\label{sec:activation}
+Unit activations, $x_j$, and outputs, $z_j$, of hidden layer units
+are calculated by:
+\begin{align*}
+  x_j &= \sum_i w_{ij} z_i + \theta_j \\
+  z_j &= \tanh(x_j)
+\end{align*}
+The output values of hidden units are then used to compute the
+activation and output value of the one output unit:
+
+\begin{align*}
+  x_k &= \sum_j w_{jk} z_j \\
+  z_k &= x_k \qquad \text{(Identity transfer function)}
+\end{align*}
+
+
+
+\subsection{Calculating the Merit Function}
+\label{sec:merit}
+The merit function, $F$, is defined as:
+\begin{align}
+  F &= \log \frac{V}{U} \nn \\
+\intertext{where $V$ is the long range variance and $U$ is the short
+  range variance:}
+V & = \frac{1}{2} \sum_k ( \zbar_k - z_k ) ^2  \label{eqn:v} \\
+U & = \frac{1}{2} \sum_k ( \ztilde_k - z_k ) ^2  \label{eqn:u} \\
+\intertext{$\zbar_k$ is the long range mean, and $\ztilde_k$ is the short
+  range mean for an output unit $k$, defined by a convolution process:}
+\zbar_k  &= \sum_a \lkernel_{a-k} z_a \\
+\ztilde_k  &= \sum_a \skernel_{a-k} z_a
+\end{align}
+where $a$ ranges over all virtual output units.
+
+To calculate the derivative of the merit function with respect to each
+weight, we need to determine:
+\begin{align*}
+\pdiff{F}{w} &= \frac{1}{V} \pdiff{V}{w} - \frac{1}{U} \pdiff{U}{w}
+\end{align*}
+
+Hence, after all of the input has been presented to the network, we
+calculate $U$ and $V$.  We then need to calculate $\pdiff{U}{W}$, or
+to use the back propagation approach \cite{rumelhart86}, we need to calculate
+$\pdiff{U}{x_a}$.
+
+
+
+
+\subsection{Deriving the Error Derivatives}
+
+In a similar fashion to the Back Propagation algorithm, once the
+errors $\delta$ are known for units in the output layer, they can then
+be used to calculate weight changes between output and hidden layer
+units. The errors can also then be propagated back to the hidden layer
+units so that the weights between input and hidden layer units can be
+updated.
+
+Given $\delta_k$ for output layer units, we can then calculate:
+\begin{align}
+\Delta w_{jk} & = \delta_k z_j \\
+\intertext{We can also calculate $\delta_j$ from the $\delta_k$:}
+\delta_j &= g'(x_j) \sum_{k} w_{jk} \delta_k \label{eqn:errorslayerj}
+\end{align}
+where $g'(x)$ is the derivative of the activation function for the
+hidden layer units.
+
+
+
+\subsubsection{Computing $\pdiff{U}{x_a}$}
+The error $\delta$ attributed to a unit is defined to be $\delta_a =
+\pdiff{E}{x_a}$ in normal back propagation, where $E$ is the overall
+error of the network, and so we need to find $\pdiff{F}{x_a}$:
+\begin{align}
+  \text{given}\quad F &= \log \frac{V}{U} \\
+  \pdiff{F}{x_a} &= \frac{1}{V} \pdiff{V}{x_a} - 
+  \frac{1}{U}
+  \pdiff{U}{x_a}\\
+  \intertext{And so to find $\pdiff{F}{x_a}$, we need to find
+    $\pdiff{U}{x_a}$ and $\pdiff{V}{x_a}$:}
+  U &= \frac{1}{2} \sum_k (\zbar_k - z)^2 \\
+  \pdiff{U}{x_a} &= \sum_k (\zbar_k - z) \left( \pdiff{\zbar_k}{x_a} - 
+    \pdiff{z_k}{x_a} \right) \label{u_xa1}\\
+  \intertext{To find   $\pdiff{z_k}{x_a}$:}
+  z_k &= f(x_k)\\
+  \intertext{Here the transfer function of the output units is the
+    identity function, and so:}
+  \pdiff{z_k}{x_a} & = \left\{
+    \begin{array}{ll}
+      1 & \text{if $a=k$} \\
+      0 & \text{otherwise} \\
+    \end{array}
+  \right. % This is an invisible delimiter.
+  \label{dzk_dxa}\\
+  \intertext{To find $\pdiff{\ztilde_k}{x_a}$:}
+  \ztilde_k  &= \sum_b \skernel_{b-k} z_b \\
+  \pdiff{\ztilde_k}{x_a} &= \sum_b \skernel_{b-k} \pdiff{z_b}{x_a} 
+  \label{zb_xa}\\
+  \intertext{Using Equation \ref{dzk_dxa}, we can then see that equation
+    \ref{zb_xa} is zero unless $a=b$:}
+  \pdiff{\ztilde_k}{x_a} &= \skernel_{a-k} \label{ztildek_xa}
+\end{align}
+The values for $\pdiff{z_k}{x_a}$ and $\pdiff{\ztilde_k}{x_a}$ from
+equations \ref{dzk_dxa} and \ref{ztildek_xa} can then be substituted
+back into equation \ref{u_xa1} to give:
+\begin{align}
+  \pdiff{U}{x_a} &= \left\{
+    \begin{array}{ll}
+      \sum_k (\ztilde_k - z) ( \skernel_{a-k} - 1) & \text{if $a=k$}
+      \\
+      \sum_k (\ztilde_k - z) ( \skernel_{a-k}) & \text{otherwise}\\
+    \end{array}
+    \right.\\
+\intertext{So, if we simply define a new kernel $\dskernel$:}
+\dskernel_a &= \left \{
+  \begin{array}{ll}
+    \skernel_a -1 & \text{if $a=0$} \\
+    \skernel_a & \text{otherwise} \\
+  \end{array}
+  \right. \\
+\pdiff{U}{x_a} &= \sum_k (\ztilde_k - z_k) \dskernel_{a-k}
+\label{eqn:dudxa} \\
+\intertext{ By symmetry, a similar expression can be derived
+for $\pdiff{V}{x_a}$, so that the final $\delta_a$ is:}
+\delta_a = \pdiff{F}{x_a} &= \frac{1}{V} \pdiff{V}{x_a} - 
+\frac{1}{U} \pdiff{U}{x_a} \label{eqn:da}
+\end{align}
+
+
+\subsubsection{Summary: Creating weight changes $\Delta w$}
+
+\begin{enumerate}
+\item Calculate the output of virtual output units.
+\item Calculate $U$ and $V$ using equations \ref{eqn:v} and \ref{eqn:u}
+\item Calculate $\delta_a$ for all output units using equations
+  \ref{eqn:dudxa} and \ref{eqn:da}.
+\item Back propagate errors to hidden layer units using equation
+  \ref{eqn:errorslayerj}.
+
+\item Calculate weight changes $\Delta w_{uv} = \delta_v z_u$ for all weights.
+
+\end{enumerate}
+
+
+\subsection{Convolution Masks}
+\label{sec:masks}
+For these experiments, exponential masks were used to create the long
+and short range weighted averages.  The short and long range
+convolution masks are created by the same equations, but using
+different values for $\lambda$:
+
+\begin{alignat*}{3}
+\text{2D:}&& \qquad  \skernel(x,y) &= \exp ^{- \lambda_u (x^2 + y^2)
+  },& \quad 
+x,y &\in [-w,+w]\\
+\text{1D:}&& \qquad  \skernel(x) &= \exp^{- \lambda_u (x^2)},&  x &\in [-w,+w]
+\end{alignat*}
+
+$\lambda$ controls the spread of the function.  Here we have defined
+$\lambda$ in terms of its half life $h$:
+
+\begin{align*}
+\lambda_u &= \frac{\ln 2}{h_u}
+\end{align*}
+
+The size of the masks is defined by the value of $w$.  Here we have
+set the cut off point for the exponentials to be four half lives from
+the centre of the mask:
+
+\[ w = \left\{ \begin{array}{ll}
+    4h & \text{if $ 4h < \frac{nx}{2} - 1$} \\
+    \frac{nx}{2} - 1 & \text{otherwise}
+\end{array} \right. \]
+where $nx$ is the width of the virtual output array.  (This upper
+limit on the mask width is to prevent the mask being bigger than the
+virtual output array.)
+The masks are also divisively normalised so that the sum of the mask
+elements is equal to $1.0$.
+
+  
+
+
+% Start-Of-Trailer
+
+\bibliographystyle{theapa}
+\bibliography{gen}
+
+\end{document}
+
+
+
+
+
+
+
