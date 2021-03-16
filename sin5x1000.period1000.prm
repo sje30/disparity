@@ -1,0 +1,29 @@
+# $file ~/disparity/sin5x1000.period1000.prm$
+# $date December 12, 1995$
+# Train the net on the original temporal net data.
+
+
+netFile		/rsuna/home2/stephene/disparity/3layer.2.net
+inputWid	5
+inputHt		1
+inputSkipX	2
+numInputVectors	1000
+totalInputWid	7000
+totalInputHt	5
+
+
+ulambda		0.021661
+vlambda		0.000021661
+
+# dimensionality of output cells
+outputWid	1000
+outputHt	1
+image1File /rsunq/vision/stephene/data/JIMS/sin_5_by_1000_period1000/image1.txt
+image2File /rsunq/vision/stephene/data/JIMS/sin_5_by_1000_period1000/image2.txt
+shiftsFile /rsunq/vision/stephene/data/JIMS/sin_5_by_1000_period1000/shifts.txt
+checker		0
+cgmax		1
+maxiterations	1000
+
+
+compcorrn	1
