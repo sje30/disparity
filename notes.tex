@@ -1,0 +1,134 @@
+%\documentstyle[harvard,egg,a4]{article}  % This is a hack for Emacs
+%C-c C-r. It needs to find \documentstyle at the top of the doc.
+% Title:  notes
+%
+% Doc: /rsuna/home2/stephene/disparity/notes.tex
+% Original Author:     Stephen Eglen <stephene@cogs.susx.ac.uk>
+% Created:             Mon Nov  6 1995
+%
+
+
+\documentclass[a4paper]{article}
+\usepackage{alltt,theapa,egg,pstimes,amstex}
+
+\newcommand{\zbar}{\bar{z}}
+\newcommand{\ztilde}{\tilde{z}}
+\newcommand{\lkernel}{\bar{\Phi}}
+\newcommand{\skernel}{\tilde{\Phi}}
+\newcommand{\dskernel}{\tilde{\Phi'}}
+
+
+\newcommand{\pdiff}[2]{ \frac{\partial #1}{\partial #2}}
+
+\begin{document}
+
+
+\title{Notes on Spatial Disparity Model}
+\author{Stephen Eglen}
+\date{\today}
+\maketitle
+\section{Inputs}
+
+The Inputs are to come from two images, image1.txt and image2.txt.
+The correspondning shift between each image is given in shifts.txt.
+
+
+\section{Possible Parameters}
+
+
+
+
+
+nir,nic: number of rows and columns in the input (i) layer.
+
+njr, njc: number of rows and columns in the hidden (j) layer.
+
+nkr, nkc: number of rows and columns in the output (k) layer.
+
+$w_{ij}$: weight connecting input cell i to hidden layer cell j.
+
+$w_{jk}$: weight connecting hidden layer cell j to output layer cell
+k.
+
+\section{Equations}
+
+
+\subsection{Activation of hidden layer cells}
+
+
+Input to hidden layer cells = $x_j$.  $a_j = \sum_i w_ij z_i$, where
+$z_i$ is the activity of input cell $i$.  The bias weight $\theta$ can
+be imagined as the special weight $w_0j$ with the corresponding input
+$z_0$ always set to 1.  The output of the hidden layer cell, $z_j = f
+(x_j)$, where $f$ is normally $\tanh$, although this may be variable.
+
+\subsection{Activation of output layer cells}
+
+Input to the output layer cells = $x_k$.  $x_k = \sum_j w_ij z_j$.
+The output of the output layer cells = $z_k$. $z_k = f_k(x_k)$, where
+$f_k$ is normally the identity function, although this may change.
+
+
+
+\section{The learning Algorithm}
+
+After each presentation of an input, the activation of the output
+cells is computed: $z_k$, for each $k$.
+
+
+\subsection{Conjugate Gradient}
+
+
+
+
+
+Arg 1: Weight vector storing all of the weights.  Arg 2: lower bound
+of weight vector. Arg 3: upper bound of the weights.
+
+Arg 4: Returns the value of the function G (will it need negating to
+find the minimum instead of the maximum?)
+
+Arg 5: A function that returns dF/dW for each weight.
+
+Arg 6: finishing criteria? (what is this?)
+
+
+
+
+
+
+\section{Terms}
+
+Update of weights can either be in batch or on line.  On line means
+that after one iteration, the weights are updated.  Batch means that
+the weights are updated at the end of one epoch.
+
+
+\section{Adding new parameters}
+To help you add new parameters that will be put into the parameter
+file, you should run the script newparam.  For example, to add the new
+integer parameter called {\it useHalf}, type {\it newparam int
+  useHalf}.  It will then give you the code that you need to
+insert into the relevant files.  
+
+
+% Start-Of-Trailer
+
+\bibliographystyle{theapa}
+\bibliography{gen}
+
+\end{document}
+
+
+% Local variables:
+% mode: latex
+% mode: outline-minor
+% outline-regexp:"\\\\chap\\|\\\\\\(sub\\)*section"
+% TeX-trailer-start: "^% Start-Of-Trailer"
+% tex-trailer: "\\bibliographystyle{theapa}\n\\bibliography{gen}\n\\end{document}\n"
+% end:
+
+
+
+
+
