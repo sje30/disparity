@@ -1,0 +1,34 @@
+# Gauss 600 x 600.
+# Take 3x3 vectors from each image.
+# Sat Dec  9 1995
+# $file ~/disparity/gauss600.40x40.prm$
+
+# 40 x 40 output array.
+
+netFile		/rsuna/home2/stephene/disparity/gauss600.net
+inputWid	3
+inputHt		3
+inputSkipX	12
+inputSkipY	12
+numInputVectors	1600
+totalInputWid	600
+totalInputHt	600
+
+useHalf		1
+uhalf		2
+vhalf		100
+
+#ulambda		0.021661
+#vlambda		0.000021661
+
+# dimensionality of output cells
+outputWid	40
+outputHt	40
+
+image1File /rsunq/vision/stephene/data/JIMS/gauss_600_by_600/image1.txt
+image2File /rsunq/vision/stephene/data/JIMS/gauss_600_by_600/image2.txt
+shiftsFile /rsunq/vision/stephene/data/JIMS/gauss_600_by_600/shifts.txt
+checker		0
+cgmax		1
+
+maxiterations	1000
